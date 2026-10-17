@@ -5,7 +5,7 @@ plugins {
 	id "org.asciidoctor.jvm.convert" version "4.0.5"
 }
 
-group = "com.alcadrial.kafkatest"
+group = "com.alcadrial.spring"
 version = "0.0.1-SNAPSHOT"
 
 java {
