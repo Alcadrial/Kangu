@@ -1,5 +1,5 @@
 <div class="size-full flex items-left bg-[url(/loginWallpaper.png)] bg-cover">
-    <div class="flex flex-col items-center justify-center gap-4 w-100 p-6 bg-neutral-900/80">
+    <form (submit)="onSubmit($event)" class="flex flex-col items-center justify-center gap-4 w-100 p-6 bg-neutral-900/80">
         <h1 class="text-amber-400 text-4xl">Kangu Login</h1>
         <div class="pb-2 pt-8 flex flex-col gap-2">
             @for (e of [
@@ -7,16 +7,25 @@
                 { label: "Email", field: loginForm.email, type: "text", placeholder: "john@acme.com" },
                 { label: "Password", field: loginForm.password, type: "password", placeholder: "***" },
             ]; track e.label) {
-                <div class="w-80 group">
-                    <div class="flex flex-row items-center justify-center">
-                        <label class="flex-1">{{e.label}}: </label>
-                        <input class="w-58 px-2 py-1 rounded-none peer focus:outline-0" [type]="e.type" [formField]="e.field" [placeholder]="e.placeholder" />
-                    </div>
-                    <div class="h-[1px] bg-amber-600 w-[80%] group-focus:w-full" ></div>
-                    <div class="h-6 flex flex-row gap-4">
-                        @if (e.field().invalid() && e.field().touched()) {
+                <div class="w-80 group justify-items-end">
+                    <label class="w-full flex flex-row items-center justify-items-start">
+                        <span class="flex-1">{{e.label}}: </span>
+                        <input
+                            class="w-58 px-4 py-1 rounded-none peer focus:outline-0"
+                            [type]="e.type"
+                            [formField]="e.field"
+                            [placeholder]="e.placeholder"
+                        />
+                    </label>
+                    @let hasError = e.field().invalid() && e.field().touched();
+                    <div [className]="hasError ? 
+                        `h-[1px] mx-0 bg-red-600 w-58 group-has-focus:w-full transition-all duration-150 ease-out` :
+                        `h-[1px] mx-3 bg-amber-600 w-52 group-has-focus:w-full group-has-focus:m-0 transition-all duration-150 ease-out`
+                    "></div>
+                    <div class="w-58 h-6 flex flex-row gap-4">
+                        @if (hasError) {
                             @for (error of e.field().errors(); track error) {
-                                <span class="text-red-500">{{error.message}}</span>
+                                <span class="w-58 px-4 py-[2px] text-red-600 text-sm">{{error.message}}</span>
                             }
                         }
                     </div>
@@ -30,7 +39,27 @@
                 <p [class]="level.style">{{level.text}}</p>
             }
         </span>
-        <button class="border border-neutral-700 bg-neutral-900 w-20 cursor-pointer" (click)="onSubmit()">Log in</button>
-        <a class="text-xs text-neutral-400" i18n routerLink="/">Back to Home</a>
-    </div>
+        @if (error()) {
+            <span class="text-red-600 text-sm">{{error()}}</span>
+        }
+        <div class="grid grid-cols-2 gap-4">
+            <label class="group p-1 flex flex-row gap-1 items-center cursor-pointer">
+                <input
+                    class="cursor-pointer"
+                    type="checkbox"
+                    [formField]="loginForm.rememberMe"
+                />
+                <span class="text-xs text-neutral-300 group-has-checked:text-neutral-100">Remember me</span>
+            </label>
+            <button
+                type="submit"
+                [disabled]="loginForm().invalid()"
+                class="w-25 text-white border border-neutral-700 bg-neutral-800 enabled:cursor-pointer disabled:text-neutral-600 disabled:border-neutral-800 disabled:bg-neutral-900"
+            >
+                Log in
+            </button>
+        </div>
+        <a class="text-sm text-neutral-400" routerLink="/register">Create a new account</a>
+        <a class="text-xs text-neutral-500" i18n routerLink="/">Back to Home</a>
+    </form>
 </div>

@@ -1,18 +1,15 @@
 import { Component, computed, inject, signal } from "@angular/core";
-import { email, form, FormField, maxLength, minLength, required } from "@angular/forms/signals";
-import { RouterLink } from "@angular/router";
+import { email, form, submit, FormField, maxLength, minLength, required } from "@angular/forms/signals";
+import { Router, RouterLink } from "@angular/router";
 import { countRegex } from "../../utils/strings";
-import { ENV } from "../../environments/environment";
 import { HttpClient } from "@angular/common/http";
+import AuthService from "../../service/AuthService";
 
 interface LoginData {
     username: string;
     email: string;
     password: string;
-}
-
-type LoginResponse = {
-    error?: string;
+    rememberMe: boolean;
 }
 
 @Component({
@@ -22,12 +19,14 @@ type LoginResponse = {
 })
 export class Login {
 
-    http = inject(HttpClient);
+    authService = inject(AuthService);
+    router = inject(Router);
 
     loginData = signal<LoginData>({
         username: "",
         email: "",
-        password: ""
+        password: "",
+        rememberMe: false
     });
     secureLevel = computed(() => {
 
@@ -37,14 +36,15 @@ export class Login {
         let score = 0;
         score += countRegex(password, /[A-Z]/, 2);
         score += countRegex(password, /[0-9]/, 4);
-        score += countRegex(password, / /, 2);
-        score += countRegex(password, /[^a-zA-Z0-9 ]/, 5);
+        score += 2 * countRegex(password, / /, 2);
+        score += 3 * countRegex(password, /[^a-zA-Z0-9 ]/, 4);
         score += Math.floor(password.length / 5);
 
         if (score < 5) return { text: "weak", "style": "text-red-400" };
         if (score < 10) return { text: "good", "style": "text-yellow-400" };
         return { text: "strong", "style": "text-green-400" };
     });
+    error = signal<string | null>(null);
 
     loginForm = form(this.loginData, p => {
         required(p.username, { message: "Missing username" });
@@ -55,21 +55,21 @@ export class Login {
         email(p.email, { message: "Enter a valid email" });
     });
 
-    async onSubmit() {
-        this.http.get<{ csrf: string }>("/api/csrf").subscribe(({ csrf }) => {
-            this.http.post<LoginResponse>("/api/login", this.loginData(), {
-                headers: {
-                    "x-csrf-token": csrf
-                }
-            }).subscribe(response => {
-
-                if (response.error !== undefined) {
-                    console.log("Login failed: ", response.error)
+    async onSubmit(event: Event) {
+        event.preventDefault();
+        submit(this.loginForm, async () => {
+            const credentials = this.loginData();
+            try {
+                if (await this.authService.login(credentials.username, credentials.password)) {
+                    this.router.navigate(["account"]);
                 }
                 else {
-                    console.log("Login successful");
+                    this.error.set("Wrong username or password");
                 }
-            });
+            }
+            catch (error) {
+                this.error.set((error as any).toString());
+            }
         });
     }
 }
