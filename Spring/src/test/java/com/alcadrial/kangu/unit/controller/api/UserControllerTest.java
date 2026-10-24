@@ -1,6 +1,5 @@
 package com.alcadrial.kangu.unit.controller.api;
 
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -12,16 +11,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.alcadrial.kangu.TestConfig;
 import com.alcadrial.kangu.api.UserController;
-import com.alcadrial.kangu.security.SecurityConfig;
 
-@WebMvcTest({SecurityConfig.class, TestConfig.class, UserController.class})
+@WebMvcTest(UserController.class)
 class UserControllerTest {
 	
 	private MockMvc mockMvc;
@@ -29,9 +27,7 @@ class UserControllerTest {
 	@BeforeEach
 	public void setUp(@Autowired WebApplicationContext applicationContext)
 	{
-		mockMvc = MockMvcBuilders.webAppContextSetup(applicationContext)
-			.apply(springSecurity())
-			.build();
+		mockMvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
 	}
 	
 	@Test
@@ -48,14 +44,23 @@ class UserControllerTest {
 	}
 	
 	@Test
-	public void getUnautenticatedSessionData() throws Exception
+	@WithAnonymousUser
+	public void getAnonymousSessionData() throws Exception
 	{
 		mockMvc
 			.perform(get("/api/user"))
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-			.andExpect(jsonPath("$.principal").value("anonymousUser"))
+			.andExpect(jsonPath("$.principal").value("anonymous"))
 			.andExpect(jsonPath("$.isAnonymous").value(true))
-			.andExpect(jsonPath("$.authorities").value(Matchers.containsInAnyOrder("ROLE_ANONYMOUS")));
+			.andExpect(jsonPath("$.authorities").value(Matchers.empty()));
+	}
+	
+	@Test
+	public void getUnautenticatedSessionData() throws Exception
+	{
+		mockMvc
+			.perform(get("/api/user"))
+			.andExpect(status().isNotFound());
 	}
 }

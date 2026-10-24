@@ -6,6 +6,10 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.support.ParameterDeclarations;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import com.alcadrial.kangu.data.UserEntity;
 
 public class TestConstants {
 	
@@ -27,6 +31,9 @@ public class TestConstants {
 	public static final String[] EMAILS_01 = {EMAIL, EMAIL1};
 	public static final String[] ALL_EMAILS = {EMAIL, EMAIL1, EMAIL2};
 	
+	public static final UserEntity USER = new UserEntity(USERNAME, PASSWORD, EMAIL, true);
+	public static final UserDetails USER_DETAILS = User.withUsername(USERNAME).password(PASSWORD).build();
+	
 	public static final String[][] CREDENTIALS_01 = crossProduct(USERNAMES_01, PASSWORDS_01);
 	public static final String[][] CREDENTIALS_ALL = crossProduct(ALL_USERNAMES, ALL_PASSWORDS);
 	
@@ -39,6 +46,7 @@ public class TestConstants {
 			return Stream.of(CREDENTIALS_01).map(Arguments::of);
 		}
 	}
+	
 	/** <pre>username,password</pre> */
 	public static class CredentialsAll implements ArgumentsProvider {
 		

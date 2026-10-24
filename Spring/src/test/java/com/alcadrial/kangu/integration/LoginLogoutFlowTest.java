@@ -10,17 +10,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.nio.charset.StandardCharsets;
+
 import org.hamcrest.Matchers;
-import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.jpa.test.autoconfigure.AutoConfigureTestEntityManager;
-import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,27 +26,24 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.alcadrial.kangu.TestConstants;
 import com.alcadrial.kangu.TestUtils;
-import com.alcadrial.kangu.data.UserEntity;
+import com.alcadrial.kangu.service.AuthService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@AutoConfigureTestEntityManager
 @Transactional
 class LoginLogoutFlowTest {
 	
 	MockMvc mockMvc;
 	@Autowired
-	private TestEntityManager entityManager;
-	@Autowired
-	private PasswordEncoder passwordEncoder;
+	private AuthService authService;
 	
 	@BeforeEach
-	public void setUp(@Autowired WebApplicationContext applicationContext)
+	public void setUp(@Autowired WebApplicationContext applicationContext) throws Exception
 	{
 		mockMvc = MockMvcBuilders.webAppContextSetup(applicationContext)
 			.apply(springSecurity())
 			.build();
-		String password = (@NonNull String) passwordEncoder.encode(TestConstants.PASSWORD);
-		entityManager.persist(new UserEntity(TestConstants.USERNAME, TestConstants.EMAIL, password));
+		authService.deleteUser(TestConstants.USERNAME);
+		authService.register(TestConstants.USERNAME, TestConstants.EMAIL, TestConstants.PASSWORD);
 	}
 	
 	@Test
@@ -58,6 +53,7 @@ class LoginLogoutFlowTest {
 			.perform(post("/api/login").with(csrf().asHeader())
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
+				.characterEncoding(StandardCharsets.UTF_8)
 				.content(TestUtils.plainJson("username", TestConstants.USERNAME, "password", TestConstants.PASSWORD))
 			)
 			.andDo(print())
