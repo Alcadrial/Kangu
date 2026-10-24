@@ -12,18 +12,20 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Entity
-@Table(name = "users", schema = "public")
+@Table(name = "users")
 public class UserEntity {
 	
 	@Id
 	private @NonNull String username;
 	@Column
+	private @NonNull String password;
+	@Column
 	private @NonNull String email;
 	@Column
-	private @NonNull String passwordHash;
+	private boolean enabled;
 	
 	public UserEntity()
 	{
-		this("", "", "");
+		this("", "", "", false);
 	}
 }

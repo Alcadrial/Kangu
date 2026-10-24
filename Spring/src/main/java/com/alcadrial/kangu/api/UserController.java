@@ -1,52 +1,50 @@
 package com.alcadrial.kangu.api;
 
-import org.springframework.security.core.Authentication;
+import org.jspecify.annotations.Nullable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.annotation.CurrentSecurityContext;
-import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import tools.jackson.databind.JsonNode;
+import lombok.AllArgsConstructor;
 import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ArrayNode;
 
+@AllArgsConstructor
 @RequestMapping("/api/user")
 @RestController
 public class UserController {
 	
 	private ObjectMapper objectMapper;
 	
-	UserController(ObjectMapper objectMapper)
-	{
-		this.objectMapper = objectMapper;
-	}
-	
 	@GetMapping
-	JsonNode get(@CurrentSecurityContext SecurityContext securityContext)
+	ResponseEntity<?> get(@AuthenticationPrincipal @Nullable Object principal)
 	{
-		Authentication auth = securityContext.getAuthentication();
+		if (principal == null) return ResponseEntity.notFound().build();
 		
-		ArrayNode authorities = objectMapper.createArrayNode();
-		for (GrantedAuthority authority : auth.getAuthorities()) authorities.add(authority.getAuthority());
-		
-		return switch (auth.getPrincipal())
+		return ResponseEntity.ok(switch (principal)
 		{
 			case User user -> objectMapper.createObjectNode()
 				.put("principal", user.getUsername())
 				.put("isEnabled", user.isEnabled())
 				.put("isExpired", !user.isCredentialsNonExpired())
 				.put("isLocked", user.isAccountNonLocked())
-				.set("authorities", authorities);
-			case String user -> objectMapper.createObjectNode()
-				.put("principal", user)
-				.put("isAnonymous", user.equals("anonymousUser"))
-				.set("authorities", authorities);
+				.set("authorities", objectMapper.createArrayNode()
+					.addAll(user.getAuthorities()
+						.stream()
+						.map(GrantedAuthority::getAuthority)
+						.map(objectMapper::stringNode)
+						.toList()
+					));
+			case String anonymous -> objectMapper.createObjectNode()
+				.put("principal", anonymous)
+				.put("isAnonymous", anonymous.equals("anonymous"))
+				.set("authorities", objectMapper.createArrayNode());
 			default -> objectMapper.createObjectNode()
-				.put("principal", auth.getPrincipal().toString())
-				.set("authorities", authorities);
-		};
+				.put("principal", principal.toString())
+				.set("authorities", objectMapper.createArrayNode());
+		});
 	}
 }

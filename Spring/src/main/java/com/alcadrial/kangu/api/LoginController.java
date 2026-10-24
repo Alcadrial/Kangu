@@ -1,6 +1,7 @@
 package com.alcadrial.kangu.api;
 
 import java.net.URI;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,39 +12,33 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alcadrial.kangu.service.AuthService;
-import com.alcadrial.kangu.service.Jsons;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
-import tools.jackson.databind.JsonNode;
+import lombok.AllArgsConstructor;
 
+@AllArgsConstructor
 @RequestMapping("/api/login")
 @RestController
 public class LoginController {
 	
-	private final AuthService authService;
-	
-	LoginController(AuthService authService)
-	{
-		this.authService = authService;
-	}
+	private AuthService authService;
 	
 	@PostMapping
-	ResponseEntity<JsonNode> post(@RequestBody JsonNode body, @Autowired HttpServletResponse response, Jsons jsons)
+	ResponseEntity<?> post(@RequestBody Request body, @Autowired HttpServletResponse response)
 	{
-		String username = body.get("username").asString(null);
-		String password = body.get("password").asString(null);
-		
-		if (username == null || password == null || password.length() < 8) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(jsons.invalidPayloadError());
+		if (body.password.length() < 8) return ResponseEntity.badRequest().build();
 		
 		try
 		{
-			authService.login(username, password);
+			authService.login(body.username, body.password, body.rememberMe.orElse(false));
 			return ResponseEntity.status(HttpStatus.TEMPORARY_REDIRECT).location(URI.create("/api/user")).build();
 		}
-		catch (EntityNotFoundException e)
+		catch (EntityNotFoundException _)
 		{
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsons.userNotFoundError());
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 	}
+	
+	record Request(String username, String password, Optional<Boolean> rememberMe) {}
 }

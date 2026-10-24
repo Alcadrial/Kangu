@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -14,8 +16,10 @@ import tools.jackson.databind.ObjectMapper;
 public class CsrfController {
 	
 	@GetMapping
-	JsonNode getCsrf(@Autowired ObjectMapper mapper, @Autowired CsrfToken csrfToken)
+	JsonNode getCsrf(@Autowired HttpServletResponse response, @Autowired ObjectMapper mapper, @Autowired CsrfToken csrfToken)
 	{
-		return mapper.createObjectNode().put("csrf", csrfToken.getToken());
+		String token = csrfToken.getToken();
+		response.addCookie(new Cookie("XSRF-TOKEN", token));
+		return mapper.createObjectNode().put("csrf", token);
 	}
 }

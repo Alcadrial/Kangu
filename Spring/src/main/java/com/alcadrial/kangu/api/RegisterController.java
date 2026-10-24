@@ -10,42 +10,40 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alcadrial.kangu.exception.DisabledException;
 import com.alcadrial.kangu.exception.DuplicateKeyException;
 import com.alcadrial.kangu.service.AuthService;
-import com.alcadrial.kangu.service.Jsons;
 import com.alcadrial.kangu.utils.Validation;
 
 import jakarta.servlet.http.HttpServletResponse;
-import tools.jackson.databind.JsonNode;
+import lombok.AllArgsConstructor;
 
+@AllArgsConstructor
 @RequestMapping("/api/register")
 @RestController
 public class RegisterController {
 	
-	private final AuthService authService;
-	
-	RegisterController(AuthService authService)
-	{
-		this.authService = authService;
-	}
+	private AuthService authService;
 	
 	@PostMapping
-	ResponseEntity<JsonNode> post(@RequestBody JsonNode body, @Autowired HttpServletResponse response, Jsons jsons)
+	ResponseEntity<?> post(@RequestBody Request body, @Autowired HttpServletResponse response)
 	{
-		String username = body.get("username").asString(null);
-		String email = body.get("email").asString(null);
-		String password = body.get("password").asString(null);
-		
-		if (username == null || username.isBlank() || password == null || email == null || !Validation.email(email) || password.length() < 8) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(jsons.invalidPayloadError());
+		if (body.username.isBlank() || !Validation.email(body.email) || body.password.length() < 8) return ResponseEntity.badRequest().build();
 		
 		try
 		{
-			authService.register(username, email, password);
+			authService.register(body.username, body.email, body.password);
 			return ResponseEntity.status(HttpStatus.TEMPORARY_REDIRECT).location(URI.create("/api/user")).build();
 		}
-		catch (DuplicateKeyException e)
+		catch (DuplicateKeyException _)
 		{
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(jsons.userNotFoundError());
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+		catch (DisabledException _)
+		{
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(new DisabledResponse("Registration is disabled"));
 		}
 	}
+	
+	record Request(String username, String password, String email) {}
 }

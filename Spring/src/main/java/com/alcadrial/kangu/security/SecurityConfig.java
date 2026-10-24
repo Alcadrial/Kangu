@@ -24,7 +24,11 @@ public class SecurityConfig {
 			)
 			.authorizeHttpRequests(c -> c
 				.anyRequest().permitAll()
-			)
+			)/*
+			.formLogin(c -> c
+				.loginPage("/api/login")
+				.loginProcessingUrl("/api/login")
+			)*/
 			.logout(c -> c
 				.logoutUrl("/api/logout")
 			);
