@@ -29,6 +29,7 @@ public class UserController {
 			case User user -> objectMapper.createObjectNode()
 				.put("principal", user.getUsername())
 				.put("isEnabled", user.isEnabled())
+				.put("isAnonymous", false)
 				.put("isExpired", !user.isCredentialsNonExpired())
 				.put("isLocked", user.isAccountNonLocked())
 				.set("authorities", objectMapper.createArrayNode()
@@ -40,7 +41,7 @@ public class UserController {
 					));
 			case String anonymous -> objectMapper.createObjectNode()
 				.put("principal", anonymous)
-				.put("isAnonymous", anonymous.equals("anonymous"))
+				.put("isAnonymous", anonymous.equals("anonymousUser"))
 				.set("authorities", objectMapper.createArrayNode());
 			default -> objectMapper.createObjectNode()
 				.put("principal", principal.toString())

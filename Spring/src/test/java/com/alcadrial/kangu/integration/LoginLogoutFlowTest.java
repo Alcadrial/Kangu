@@ -1,79 +1,87 @@
 package com.alcadrial.kangu.integration;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.nio.charset.StandardCharsets;
+import java.util.List;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.test.web.servlet.client.RestTestClient;
 
 import com.alcadrial.kangu.TestConstants;
 import com.alcadrial.kangu.TestUtils;
 import com.alcadrial.kangu.service.AuthService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Transactional
+@AutoConfigureRestTestClient
 class LoginLogoutFlowTest {
 	
-	MockMvc mockMvc;
+	@Autowired
+	private RestTestClient restClient;
 	@Autowired
 	private AuthService authService;
 	
 	@BeforeEach
-	public void setUp(@Autowired WebApplicationContext applicationContext) throws Exception
+	public void setUp() throws Exception
 	{
-		mockMvc = MockMvcBuilders.webAppContextSetup(applicationContext)
-			.apply(springSecurity())
-			.build();
 		authService.deleteUser(TestConstants.USERNAME);
 		authService.register(TestConstants.USERNAME, TestConstants.EMAIL, TestConstants.PASSWORD);
+		restClient = TestUtils.getSessionAndCsrfTokens(restClient);
 	}
 	
+	record UserSessionData(String principal, boolean isEnabled, boolean isAnonymous, List<String> authorities) {}
+	
+	record AnonymousSessionData(String principal, boolean isAnonymous, List<String> authorities) {}
+	
+	@SuppressWarnings("null")
 	@Test
 	void flow() throws Exception
 	{
-		mockMvc
-			.perform(post("/api/login").with(csrf().asHeader())
-				.accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.characterEncoding(StandardCharsets.UTF_8)
-				.content(TestUtils.plainJson("username", TestConstants.USERNAME, "password", TestConstants.PASSWORD))
-			)
-			.andDo(print())
-			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/api/user"));
-		mockMvc
-			.perform(get("/api/user").with(csrf().asHeader())
-				.accept(MediaType.APPLICATION_JSON)
-			)
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-			.andExpect(jsonPath("$.principal").value(TestConstants.USERNAME))
-			.andExpect(jsonPath("$.isEnabled").value(true))
-			.andExpect(jsonPath("$.authorities").value(Matchers.containsInAnyOrder("ROLE_USER")));
-		mockMvc
-			.perform(post("/api/logout").with(csrf().asHeader())
-				.accept(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN)
-			)
-			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/login?logout"));
+		restClient
+			.get().uri("/api/user")
+			.exchange()
+			.expectStatus().isOk()
+			.expectBody(AnonymousSessionData.class)
+			.value(d -> {
+				assertEquals("anonymousUser", d.principal);
+				assertEquals(true, d.isAnonymous);
+				assertTrue(d.authorities.isEmpty());
+			});
+		restClient
+			.post().uri("/api/login")
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(TestUtils.plainJson("username", TestConstants.USERNAME, "password", TestConstants.PASSWORD))
+			.exchangeSuccessfully();
+		restClient
+			.get().uri("/api/user")
+			.exchange()
+			.expectStatus().isOk()
+			.expectBody(UserSessionData.class)
+			.value(d -> {
+				assertEquals(TestConstants.USERNAME, d.principal);
+				assertEquals(false, d.isAnonymous);
+				assertEquals(true, d.isEnabled);
+				assertTrue(d.authorities.contains("ROLE_USER"));
+			});
+		restClient
+			.post().uri("/api/logout")
+			.exchange()
+			.expectStatus().is3xxRedirection();
+		restClient
+			.get().uri("/api/user")
+			.exchange()
+			.expectStatus().isOk()
+			.expectBody(AnonymousSessionData.class)
+			.value(d -> {
+				assertEquals("anonymousUser", d.principal);
+				assertEquals(true, d.isAnonymous);
+				assertTrue(d.authorities.isEmpty());
+			});
 	}
 }

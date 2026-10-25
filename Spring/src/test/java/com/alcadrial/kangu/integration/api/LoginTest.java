@@ -4,7 +4,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -70,9 +69,7 @@ class LoginTest {
 				.characterEncoding(StandardCharsets.UTF_8)
 				.content(TestUtils.plainJson("username", TestConstants.USERNAME, "password", TestConstants.PASSWORD))
 			)
-			.andDo(print())
-			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/api/user"));
+			.andExpect(status().isOk());
 	}
 	
 	@Test
@@ -85,7 +82,6 @@ class LoginTest {
 				.characterEncoding(StandardCharsets.UTF_8)
 				.content(TestUtils.plainJson("username", TestConstants.USERNAME, "password", TestConstants.PASSWORD1))
 			)
-			.andDo(print())
 			.andExpect(status().isUnauthorized());
 	}
 	
@@ -98,7 +94,7 @@ class LoginTest {
 				.accept(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN)
 			)
 			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/login?logout"));
+			.andExpect(redirectedUrl("/"));
 	}
 	
 	@Test
@@ -109,6 +105,6 @@ class LoginTest {
 				.accept(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN)
 			)
 			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/login?logout"));
+			.andExpect(redirectedUrl("/"));
 	}
 }

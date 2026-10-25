@@ -38,7 +38,7 @@ class LogoutControllerTest {
 		mockMvc
 			.perform(post("/api/logout").with(csrf().asHeader()))
 			.andExpect(status().is3xxRedirection())
-			.andExpect(header().string(HttpHeaders.LOCATION, "/login?logout"));
+			.andExpect(header().string(HttpHeaders.LOCATION, "/"));
 	}
 	
 	@Test
@@ -48,6 +48,6 @@ class LogoutControllerTest {
 		mockMvc
 			.perform(post("/api/logout").with(csrf().asHeader()))
 			.andExpect(status().is3xxRedirection())
-			.andExpect(header().string(HttpHeaders.LOCATION, "/login?logout"));
+			.andExpect(header().string(HttpHeaders.LOCATION, "/"));
 	}
 }

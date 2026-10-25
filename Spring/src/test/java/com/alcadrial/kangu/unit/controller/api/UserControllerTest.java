@@ -11,13 +11,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.alcadrial.kangu.api.UserController;
+import com.alcadrial.kangu.util.WithAnonymousUser;
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
@@ -51,7 +51,7 @@ class UserControllerTest {
 			.perform(get("/api/user"))
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-			.andExpect(jsonPath("$.principal").value("anonymous"))
+			.andExpect(jsonPath("$.principal").value("anonymousUser"))
 			.andExpect(jsonPath("$.isAnonymous").value(true))
 			.andExpect(jsonPath("$.authorities").value(Matchers.empty()));
 	}

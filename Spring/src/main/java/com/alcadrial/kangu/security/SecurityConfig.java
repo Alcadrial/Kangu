@@ -1,5 +1,6 @@
 package com.alcadrial.kangu.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -7,6 +8,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.context.DelegatingSecurityContextRepository;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 
 @EnableWebSecurity
@@ -14,7 +19,7 @@ import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler
 public class SecurityConfig {
 	
 	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http)
+	SecurityFilterChain securityFilterChain(HttpSecurity http, @Autowired SecurityContextRepository securityContextRepository)
 	{
 		XorCsrfTokenRequestAttributeHandler requestHandler = new XorCsrfTokenRequestAttributeHandler();
 		requestHandler.setCsrfRequestAttributeName(null);
@@ -24,13 +29,14 @@ public class SecurityConfig {
 			)
 			.authorizeHttpRequests(c -> c
 				.anyRequest().permitAll()
-			)/*
-			.formLogin(c -> c
-				.loginPage("/api/login")
-				.loginProcessingUrl("/api/login")
-			)*/
+			)
+			.securityContext(c -> c
+				.securityContextRepository(securityContextRepository)
+				.requireExplicitSave(true)
+			)
 			.logout(c -> c
 				.logoutUrl("/api/logout")
+				.logoutSuccessUrl("/")
 			);
 		
 		return http.build();
@@ -40,5 +46,13 @@ public class SecurityConfig {
 	PasswordEncoder passwordEncoder()
 	{
 		return new BCryptPasswordEncoder();
+	}
+	
+	@Bean
+	SecurityContextRepository securityContextRepository()
+	{
+		return new DelegatingSecurityContextRepository(
+			new HttpSessionSecurityContextRepository(), new RequestAttributeSecurityContextRepository()
+		);
 	}
 }
