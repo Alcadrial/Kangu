@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -34,6 +36,10 @@ class RegisterControllerTest {
 	private MockMvc mockMvc;
 	@MockitoBean
 	private AuthService authService;
+	@MockitoBean
+	private AuthenticationManager authenticationManager;
+	@MockitoBean
+	private SecurityContextRepository securityContextRepository;
 	
 	@BeforeEach
 	public void setUp(@Autowired WebApplicationContext applicationContext)

@@ -41,9 +41,11 @@ public class LoginController {
 		{
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
+		
 		SecurityContext securityContext = SecurityContextHolder.getContext();
 		securityContext.setAuthentication(authenticationToken);
 		securityContextRepository.saveContext(securityContext, request, response);
+		
 		return ResponseEntity.ok().build();
 	}
 	

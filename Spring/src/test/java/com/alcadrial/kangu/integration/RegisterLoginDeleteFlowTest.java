@@ -46,6 +46,8 @@ class RegisterLoginDeleteFlowTest {
 			.expectStatus().is3xxRedirection();
 		TestUtils.assertValidUserSession(restClient, TestConstants.USERNAME);
 		TestUtils.assertLogout(restClient);
+		restClient = TestUtils.getSessionAndCsrfTokens(restClient);
+		
 		restClient
 			.post().uri("/api/login")
 			.contentType(MediaType.APPLICATION_JSON)
@@ -54,14 +56,16 @@ class RegisterLoginDeleteFlowTest {
 			.expectStatus().isOk();
 		restClient
 			.post().uri("/api/delete")
+			.contentType(MediaType.APPLICATION_JSON)
 			.body(TestUtils.plainJson("username", TestConstants.USERNAME, "password", TestConstants.PASSWORD1))
 			.exchange()
 			.expectStatus().isUnauthorized();
 		restClient
 			.post().uri("/api/delete")
+			.contentType(MediaType.APPLICATION_JSON)
 			.body(TestUtils.plainJson("username", TestConstants.USERNAME, "password", TestConstants.PASSWORD))
 			.exchange()
-			.expectStatus().isOk();
+			.expectStatus().is3xxRedirection();
 		restClient
 			.post().uri("/api/login")
 			.contentType(MediaType.APPLICATION_JSON)

@@ -79,13 +79,15 @@ public class AuthService {
 		}
 	}
 	
-	public void deleteUserIfPasswordMatches(String username, String password)
+	public boolean deleteUserIfPasswordMatches(String username, String password)
 	{
 		Optional<UserEntity> optionalUser = userRepository.findById(username);
 		if (optionalUser.isPresent() && passwordEncoder.matches(password, optionalUser.get().getPassword()))
 		{
 			userDetailsManager.deleteUser(username);
+			return true;
 		}
+		return false;
 	}
 	
 	public void deleteUser(String username)

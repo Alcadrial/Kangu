@@ -70,12 +70,11 @@ public class TestUtils {
 			});
 	}
 	
-	@SuppressWarnings("null")
 	public static void assertLogout(RestTestClient restClient)
 	{
 		restClient
-			.get().uri("/api/logout")
+			.post().uri("/api/logout")
 			.exchange()
-			.expectStatus().isOk();
+			.expectStatus().is3xxRedirection();
 	}
 }
