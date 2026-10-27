@@ -1,10 +1,11 @@
 package com.alcadrial.kangu.unit.controller.api;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -16,8 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -36,10 +35,6 @@ class RegisterControllerTest {
 	private MockMvc mockMvc;
 	@MockitoBean
 	private AuthService authService;
-	@MockitoBean
-	private AuthenticationManager authenticationManager;
-	@MockitoBean
-	private SecurityContextRepository securityContextRepository;
 	
 	@BeforeEach
 	public void setUp(@Autowired WebApplicationContext applicationContext)
@@ -50,20 +45,20 @@ class RegisterControllerTest {
 	@Test
 	public void registerNewUserWithSuccess() throws Exception
 	{
+		when(authService.login(any(), anyBoolean(), any(), any())).then(_ -> TestConstants.USER);
 		mockMvc
 			.perform(post("/api/register")
 				.contentType(MediaType.APPLICATION_JSON)
 				.characterEncoding(StandardCharsets.UTF_8)
 				.content(TestUtils.plainJson("username", TestConstants.USERNAME, "email", TestConstants.EMAIL, "password", TestConstants.PASSWORD))
 			)
-			.andExpect(status().is3xxRedirection())
-			.andExpect(header().string("Location", "/api/user"));
+			.andExpect(status().isOk());
 	}
 	
 	@Test
 	public void failToRegisterUserWithDuplicatedUsername() throws Exception
 	{
-		doThrow(DuplicateKeyException.class).when(authService).register(eq(TestConstants.USERNAME), anyString(), anyString());
+		doThrow(DuplicateKeyException.class).when(authService).register(anyString(), anyString(), anyString());
 		
 		mockMvc
 			.perform(post("/api/register")

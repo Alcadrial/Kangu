@@ -1,6 +1,7 @@
 package com.alcadrial.kangu.unit.controller.api;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -13,9 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -32,10 +31,6 @@ class LoginControllerTest {
 	private MockMvc mockMvc;
 	@MockitoBean
 	private AuthService authService;
-	@MockitoBean
-	private AuthenticationManager authenticationManager;
-	@MockitoBean
-	private SecurityContextRepository securityContextRepository;
 	
 	@BeforeEach
 	public void setUp(@Autowired WebApplicationContext applicationContext)
@@ -46,6 +41,8 @@ class LoginControllerTest {
 	@Test
 	public void validLoginPost() throws Exception
 	{
+		when(authService.login(any(), anyBoolean(), any(), any())).then(_ -> TestConstants.USER);
+		
 		mockMvc
 			.perform(post("/api/login")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -59,7 +56,7 @@ class LoginControllerTest {
 	@Test
 	public void invalidLoginPost() throws Exception
 	{
-		when(authenticationManager.authenticate(any())).thenThrow(BadCredentialsException.class);
+		when(authService.login(any(), anyBoolean(), any(), any())).thenThrow(BadCredentialsException.class);
 		
 		mockMvc
 			.perform(post("/api/login")

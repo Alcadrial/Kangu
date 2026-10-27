@@ -44,13 +44,18 @@ public class TestUtils {
 			.get().uri("/api/csrf")
 			.exchangeSuccessfully()
 			.expectBody(CsrfResponse.class)
-			.value(c -> assertNotNull(c.csrf))
+			.value(c -> {
+				assertNotNull(c);
+				assertNotNull(c.csrf);
+			})
 			.returnResult();
 		List<ResponseCookie> setCookie = r.getResponseCookies().get("JSESSIONID");
-		assertNotNull(setCookie, "Missing SET_COOKIE");
-		assertEquals(1, setCookie.size(), "Wrong SET_COOKIE");
+		CsrfResponse responseBody = r.getResponseBody();
+		assertNotNull(responseBody);
+		assertNotNull(setCookie);
+		assertEquals(1, setCookie.size());
 		String sessionToken = setCookie.getFirst().getValue();
-		String csrfToken = r.getResponseBody().csrf();
+		String csrfToken = responseBody.csrf();
 		return restClient.mutate().defaultHeader("X-CSRF-TOKEN", csrfToken).defaultCookie("JSESSIONID", sessionToken).build();
 	}
 	
@@ -63,6 +68,7 @@ public class TestUtils {
 			.expectStatus().isOk()
 			.expectBody(UserSessionData.class)
 			.value(d -> {
+				assertNotNull(d);
 				assertEquals(principal, d.principal);
 				assertEquals(false, d.isAnonymous);
 				assertEquals(true, d.isEnabled);

@@ -1,14 +1,23 @@
 package com.alcadrial.kangu.service;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import org.jspecify.annotations.NonNull;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsPasswordService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.GroupManager;
 import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +28,8 @@ import com.alcadrial.kangu.properties.RegistrationProperties;
 import com.alcadrial.kangu.repository.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -32,6 +43,8 @@ public class AuthService {
 	private final UserDetailsPasswordService passwordService;
 	private final PasswordEncoder passwordEncoder;
 	private final RegistrationProperties properties;
+	private final AuthenticationManager authenticationManager;
+	private final SecurityContextRepository securityContextRepository;
 	
 	public void register(String username, String email, String password) throws DuplicateKeyException, DisabledException
 	{
@@ -45,21 +58,23 @@ public class AuthService {
 		groupManager.addUserToGroup(username, "users");
 	}
 	
-	public UserEntity login(String username, String password, boolean rememberMe) throws EntityNotFoundException
+	public UserEntity login(Authentication authenticationToken, boolean rememberMe, HttpServletRequest request, HttpServletResponse response) throws AuthenticationException
 	{
-		try
-		{
-			UserDetails user = userDetailsManager.loadUserByUsername(username);
-			
-			if (!passwordEncoder.matches(password, user.getPassword())) throw new EntityNotFoundException("Wrong password");
-			return userRepository.findById(username).get();
-		}
-		catch (UsernameNotFoundException _)
-		{
-			//avoid timing attacks
-			passwordEncoder.matches(password, password);
-			throw new EntityNotFoundException("Username not found");
-		}
+		authenticationToken = authenticationManager.authenticate(authenticationToken);
+
+		SecurityContext securityContext = SecurityContextHolder.getContext();
+		securityContext.setAuthentication(authenticationToken);
+		securityContextRepository.saveContext(securityContext, request, response);
+		
+		return userRepository.findById(authenticationToken.getName()).get();
+	}
+	
+	public Collection<? extends GrantedAuthority> getAuthorities()
+	{
+		SecurityContext securityContext = SecurityContextHolder.getContext();
+		Authentication authentication = securityContext.getAuthentication();
+		if (authentication == null) return List.of();
+		return authentication.getAuthorities();
 	}
 	
 	public void changePassword(String username, String oldPassword, String newPassword)

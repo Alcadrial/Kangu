@@ -1,6 +1,7 @@
 package com.alcadrial.kangu.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -49,6 +50,7 @@ class LoginLogoutFlowTest {
 			.expectStatus().isOk()
 			.expectBody(AnonymousSessionData.class)
 			.value(d -> {
+				assertNotNull(d);
 				assertEquals("anonymousUser", d.principal);
 				assertEquals(true, d.isAnonymous);
 				assertTrue(d.authorities.isEmpty());
@@ -64,6 +66,7 @@ class LoginLogoutFlowTest {
 			.expectStatus().isOk()
 			.expectBody(UserSessionData.class)
 			.value(d -> {
+				assertNotNull(d);
 				assertEquals(TestConstants.USERNAME, d.principal);
 				assertEquals(false, d.isAnonymous);
 				assertEquals(true, d.isEnabled);
@@ -79,6 +82,7 @@ class LoginLogoutFlowTest {
 			.expectStatus().isOk()
 			.expectBody(AnonymousSessionData.class)
 			.value(d -> {
+				assertNotNull(d);
 				assertEquals("anonymousUser", d.principal);
 				assertEquals(true, d.isAnonymous);
 				assertTrue(d.authorities.isEmpty());

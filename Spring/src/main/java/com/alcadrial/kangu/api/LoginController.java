@@ -5,17 +5,17 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.alcadrial.kangu.data.UserEntity;
+import com.alcadrial.kangu.service.AuthService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,8 +26,7 @@ import lombok.AllArgsConstructor;
 @RestController
 public class LoginController {
 	
-	private AuthenticationManager authenticationManager;
-	private SecurityContextRepository securityContextRepository;
+	private AuthService authService;
 	
 	@PostMapping
 	ResponseEntity<?> post(@RequestBody Request body, @Autowired HttpServletResponse response, @Autowired HttpServletRequest request)
@@ -35,19 +34,15 @@ public class LoginController {
 		Authentication authenticationToken = UsernamePasswordAuthenticationToken.unauthenticated(body.username, body.password);
 		try
 		{
-			authenticationToken = authenticationManager.authenticate(authenticationToken);
+			UserEntity user = authService.login(authenticationToken, body.rememberMe.orElse(false), request, response);
+			return ResponseEntity.ok(new Response(user.getUsername(), user.getEmail(), authService.getAuthorities().stream().map(GrantedAuthority::getAuthority).toArray(String[]::new)));
 		}
 		catch (AuthenticationException _)
 		{
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
-		
-		SecurityContext securityContext = SecurityContextHolder.getContext();
-		securityContext.setAuthentication(authenticationToken);
-		securityContextRepository.saveContext(securityContext, request, response);
-		
-		return ResponseEntity.ok().build();
 	}
 	
 	record Request(String username, String password, Optional<Boolean> rememberMe) {}
+	record Response(String username, String email, String[] authorities) {}
 }

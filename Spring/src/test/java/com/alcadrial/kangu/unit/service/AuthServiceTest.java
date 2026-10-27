@@ -3,6 +3,7 @@ package com.alcadrial.kangu.unit.service;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -20,13 +21,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mock.Strictness;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetailsPasswordService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.keygen.BytesKeyGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.GroupManager;
 import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.security.web.context.SecurityContextRepository;
 
 import com.alcadrial.kangu.TestConstants;
 import com.alcadrial.kangu.TestUtils;
@@ -36,7 +39,8 @@ import com.alcadrial.kangu.properties.RegistrationProperties;
 import com.alcadrial.kangu.repository.UserRepository;
 import com.alcadrial.kangu.service.AuthService;
 
-import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -59,6 +63,14 @@ class AuthServiceTest {
 	private BytesKeyGenerator keyGenerator;
 	@Mock
 	private RegistrationProperties registrationProperties;
+	@Mock
+	private AuthenticationManager authenticationManager;
+	@Mock
+	private SecurityContextRepository securityContextRepository;
+	@Mock
+	private HttpServletRequest request;
+	@Mock
+	private HttpServletResponse response;
 	@InjectMocks
 	private AuthService authService;
 	
@@ -71,11 +83,12 @@ class AuthServiceTest {
 	@Test
 	void successLogin()
 	{
-		when(userDetailsManager.loadUserByUsername(USERNAME)).thenReturn(TestConstants.USER_DETAILS);
 		when(userRepository.findById(USERNAME)).thenReturn(Optional.of(TestConstants.USER));
+		when(authenticationManager.authenticate(any())).then(invok -> invok.getArgument(0));
 		
 		assertDoesNotThrow(() -> {
-			UserEntity user = authService.login(USERNAME, PASSWORD, false);
+			UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD);
+			UserEntity user = authService.login(authenticationToken, false, request, response);
 			assertEquals(USERNAME, user.getUsername(), "Wrong username");
 			assertEquals(EMAIL, user.getEmail(), "Wrong email");
 		});
@@ -84,10 +97,11 @@ class AuthServiceTest {
 	@Test
 	void failLogin()
 	{
-		when(userDetailsManager.loadUserByUsername(USERNAME)).thenThrow(UsernameNotFoundException.class);
+		when(authenticationManager.authenticate(any())).thenThrow(BadCredentialsException.class);
 		
-		assertThrows(EntityNotFoundException.class, () -> {
-			authService.login(USERNAME, PASSWORD, false);
+		assertThrows(BadCredentialsException.class, () -> {
+			UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD);
+			authService.login(authenticationToken, false, request, response);
 		});
 	}
 	
@@ -96,12 +110,12 @@ class AuthServiceTest {
 	{
 		when(registrationProperties.isEnabled()).thenReturn(true);
 		when(userDetailsManager.userExists(anyString())).thenReturn(false);
+		when(authenticationManager.authenticate(any())).then(invok -> invok.getArgument(0));
 		doAnswer(invok -> {
 			String username = invok.getArgument(0);
 			String password = invok.getArgument(1);
 			String email = invok.getArgument(2);
 			boolean enabled = invok.getArgument(3);
-			when(userDetailsManager.loadUserByUsername(username)).thenReturn(User.withUsername(username).password(password).build());
 			when(userRepository.findById(username)).thenReturn(Optional.of(new UserEntity(username, password, email, enabled)));
 			return null;
 		})
@@ -112,7 +126,8 @@ class AuthServiceTest {
 
 		assertDoesNotThrow(() -> {
 			authService.register(USERNAME, EMAIL, PASSWORD);
-			UserEntity user = authService.login(USERNAME, PASSWORD, false);
+			UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD);
+			UserEntity user = authService.login(authenticationToken, false, request, response);
 			assertEquals(USERNAME, user.getUsername(), "Wrong username");
 			assertEquals(EMAIL, user.getEmail(), "Wrong email");
 		});
