@@ -28,6 +28,10 @@ public class SecurityConfig {
 				.csrfTokenRequestHandler(requestHandler)
 			)
 			.authorizeHttpRequests(c -> c
+				.requestMatchers("/api/delete").hasAnyRole("USER")
+				.requestMatchers("/api/messages/**").hasAnyRole("USER")
+				.requestMatchers("/api/admin").hasAnyRole("ADMIN")
+				.requestMatchers("/api/admin/**").hasAnyRole("ADMIN")
 				.anyRequest().permitAll()
 			)
 			.securityContext(c -> c
