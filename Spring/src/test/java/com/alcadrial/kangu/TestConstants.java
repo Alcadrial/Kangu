@@ -30,6 +30,10 @@ public class TestConstants {
 	public static final String EMAIL2 = "g2@g.g";
 	public static final String[] EMAILS_01 = {EMAIL, EMAIL1};
 	public static final String[] ALL_EMAILS = {EMAIL, EMAIL1, EMAIL2};
+
+	public static final String MESSAGE = "message";
+	public static final String MESSAGE1 = "message1";
+	public static final String MESSAGE2 = "message2";
 	
 	public static final UserEntity USER = new UserEntity(USERNAME, PASSWORD, EMAIL);
 	public static final UserDetails USER_DETAILS = User.withUsername(USERNAME).password(PASSWORD).build();

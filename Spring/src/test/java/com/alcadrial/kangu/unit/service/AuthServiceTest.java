@@ -25,7 +25,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetailsPasswordService;
-import org.springframework.security.crypto.keygen.BytesKeyGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.GroupManager;
 import org.springframework.security.provisioning.UserDetailsManager;
@@ -59,8 +58,6 @@ class AuthServiceTest {
 	private GroupManager groupManager;
 	@Mock
 	private UserDetailsPasswordService passwordService;
-	@Mock
-	private BytesKeyGenerator keyGenerator;
 	@Mock
 	private RegistrationProperties registrationProperties;
 	@Mock

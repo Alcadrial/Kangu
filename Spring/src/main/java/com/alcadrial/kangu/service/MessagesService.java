@@ -1,7 +1,9 @@
 package com.alcadrial.kangu.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,9 +55,22 @@ public class MessagesService {
 		messagesReadCursorsRepository.updateBlockedStatus(sender, receiver, false);
 	}
 	
-	public void readMessageByArrivalTimestamp(String sender, String receiver, LocalDateTime time)
+	public List<String> readMessageByArrivalTimestamp(String sender, String receiver, @Nullable LocalDateTime time, int part)
 	{
 		int limit = messagesProperties.getMaxBulkMessagesCount();
-		messagesRepository.findMessagesFromSentBeforeTime(receiver, receiver, time, limit);
+		if (time == null)
+		{
+			if (sender.equals(receiver))
+			{
+				return messagesRepository.findMessagesSelfSent(sender, limit);
+			}
+			return messagesRepository.findMessagesSentOrReceived(sender, receiver, limit);
+		}
+		
+		if (sender.equals(receiver))
+		{
+			return messagesRepository.findMessagesSelfSentBeforeTimeAndPart(sender, time, part, limit);
+		}
+		return messagesRepository.findMessagesSentOrReceivedBeforeTimeAndPart(sender, receiver, time, part, limit);
 	}
 }
