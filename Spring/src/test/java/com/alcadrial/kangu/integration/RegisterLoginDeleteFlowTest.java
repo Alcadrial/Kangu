@@ -43,7 +43,7 @@ class RegisterLoginDeleteFlowTest {
 			.contentType(MediaType.APPLICATION_JSON)
 			.body(TestUtils.plainJson("username", TestConstants.USERNAME, "email", TestConstants.EMAIL, "password", TestConstants.PASSWORD))
 			.exchange()
-			.expectStatus().is3xxRedirection();
+			.expectStatus().isOk();
 		TestUtils.assertValidUserSession(restClient, TestConstants.USERNAME);
 		TestUtils.assertLogout(restClient);
 		restClient = TestUtils.getSessionAndCsrfTokens(restClient);

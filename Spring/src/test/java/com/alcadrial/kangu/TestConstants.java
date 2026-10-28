@@ -31,7 +31,7 @@ public class TestConstants {
 	public static final String[] EMAILS_01 = {EMAIL, EMAIL1};
 	public static final String[] ALL_EMAILS = {EMAIL, EMAIL1, EMAIL2};
 	
-	public static final UserEntity USER = new UserEntity(USERNAME, PASSWORD, EMAIL, true);
+	public static final UserEntity USER = new UserEntity(USERNAME, PASSWORD, EMAIL);
 	public static final UserDetails USER_DETAILS = User.withUsername(USERNAME).password(PASSWORD).build();
 	
 	public static final String[][] CREDENTIALS_01 = crossProduct(USERNAMES_01, PASSWORDS_01);

@@ -39,6 +39,6 @@ public class MessageLookupEntity {
 	
 	public MessageLookupEntity()
 	{
-		this("", "", "", LocalDateTime.of(2026, 1, 1, 0, 0), 0);
+		this("", "", "", LocalDateTime.of(2026, 1, 1, 0, 0, 0, 0), 0);
 	}
 }

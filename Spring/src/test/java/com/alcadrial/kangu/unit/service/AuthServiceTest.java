@@ -115,8 +115,7 @@ class AuthServiceTest {
 			String username = invok.getArgument(0);
 			String password = invok.getArgument(1);
 			String email = invok.getArgument(2);
-			boolean enabled = invok.getArgument(3);
-			when(userRepository.findById(username)).thenReturn(Optional.of(new UserEntity(username, password, email, enabled)));
+			when(userRepository.findById(username)).thenReturn(Optional.of(new UserEntity(username, password, email)));
 			return null;
 		})
 			.when(userRepository)

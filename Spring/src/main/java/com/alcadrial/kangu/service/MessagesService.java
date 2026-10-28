@@ -6,10 +6,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alcadrial.kangu.data.MessageLookupEntity;
+import com.alcadrial.kangu.exception.BlockedException;
 import com.alcadrial.kangu.exception.MessageTooLongException;
+import com.alcadrial.kangu.exception.UserNotFoundException;
 import com.alcadrial.kangu.properties.MessagesProperties;
 import com.alcadrial.kangu.repository.MessagesReadCursorsRepository;
 import com.alcadrial.kangu.repository.MessagesRepository;
+import com.alcadrial.kangu.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,13 +21,17 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class MessagesService {
 	
+	private final UserRepository userRepository;
 	private final MessagesRepository messagesRepository;
 	private final MessagesReadCursorsRepository messagesReadCursorsRepository;
 	private final MessagesProperties messagesProperties;
 	
-	public void sendMessage(char[] password, String sender, String receiver, String message, LocalDateTime time) throws MessageTooLongException
+	public void sendMessage(String sender, String receiver, String message, LocalDateTime time) throws MessageTooLongException, UserNotFoundException, BlockedException
 	{
 		if (message.length() > messagesProperties.getMaxMessageSize()) throw new MessageTooLongException();
+		if (!userRepository.existsById(receiver)) throw new UserNotFoundException();
+		if (messagesReadCursorsRepository.isSenderBlocked(sender, receiver)) throw new BlockedException();
+		
 		int blockSize = messagesProperties.getMaxMessageBlockSize();
 		int partIndex = 0;
 		while (blockSize < message.length())
