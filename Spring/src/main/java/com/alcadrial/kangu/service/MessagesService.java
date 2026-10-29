@@ -4,16 +4,18 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alcadrial.kangu.data.MessageLookupEntity;
+import com.alcadrial.kangu.data.MessageEntity;
 import com.alcadrial.kangu.exception.BlockedException;
 import com.alcadrial.kangu.exception.MessageTooLongException;
 import com.alcadrial.kangu.exception.UserNotFoundException;
 import com.alcadrial.kangu.properties.MessagesProperties;
 import com.alcadrial.kangu.repository.MessagesReadCursorsRepository;
 import com.alcadrial.kangu.repository.MessagesRepository;
+import com.alcadrial.kangu.repository.MessagesRepository.Message;
 import com.alcadrial.kangu.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -39,10 +41,10 @@ public class MessagesService {
 		while (blockSize < message.length())
 		{
 			String block = message.substring(0, blockSize);
-			messagesRepository.save(new MessageLookupEntity(sender, receiver, block, time, partIndex++));
+			messagesRepository.save(new MessageEntity(sender, receiver, block, MediaType.TEXT_PLAIN_VALUE, time, partIndex++));
 			message = message.substring(blockSize);
 		}
-		messagesRepository.save(new MessageLookupEntity(sender, receiver, message, time, partIndex));
+		messagesRepository.save(new MessageEntity(sender, receiver, message, MediaType.TEXT_PLAIN_VALUE, time, partIndex));
 	}
 	
 	public void blockUser(String sender, String receiver)
@@ -55,7 +57,7 @@ public class MessagesService {
 		messagesReadCursorsRepository.updateBlockedStatus(sender, receiver, false);
 	}
 	
-	public List<String> readMessageByArrivalTimestamp(String sender, String receiver, @Nullable LocalDateTime time, int part)
+	public List<Message> readMessageByArrivalTimestamp(String sender, String receiver, @Nullable LocalDateTime time, int part)
 	{
 		int limit = messagesProperties.getMaxBulkMessagesCount();
 		if (time == null)

@@ -1,6 +1,8 @@
 package com.alcadrial.kangu.api;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alcadrial.kangu.exception.BlockedException;
 import com.alcadrial.kangu.exception.MessageTooLongException;
 import com.alcadrial.kangu.exception.UserNotFoundException;
+import com.alcadrial.kangu.repository.MessagesRepository.Message;
 import com.alcadrial.kangu.service.MessagesService;
 
 import lombok.RequiredArgsConstructor;
@@ -34,7 +37,7 @@ public class MessagesController {
 	{
 		try
 		{
-			messagesService.sendMessage(user.getUsername(), body.receiver(), body.message(), LocalDateTime.now());
+			messagesService.sendMessage(user.getUsername(), body.receiver(), body.message(), LocalDateTime.now(ZoneId.ofOffset("UTC", ZoneOffset.ofHours(0))));
 			return ResponseEntity.noContent().build();
 		}
 		catch (MessageTooLongException e)
@@ -56,7 +59,7 @@ public class MessagesController {
 	@GetMapping("/get")
 	ResponseEntity<?> getMessages(@AuthenticationPrincipal User user, @RequestParam("user") String otherUsername, @RequestParam(value = "before", required = false) @Nullable LocalDateTime before, @RequestParam(value = "part", defaultValue = "0") int part)
 	{
-		List<String> messages = messagesService.readMessageByArrivalTimestamp(user.getUsername(), otherUsername, before, part);
+		List<Message> messages = messagesService.readMessageByArrivalTimestamp(user.getUsername(), otherUsername, before, part);
 		
 		return ResponseEntity.ok(messages);
 	}

@@ -8,7 +8,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +18,7 @@ import lombok.Data;
 @Table(name = "messages")
 @IdClass(MessageEntity.PrimaryKey.class)
 public class MessageEntity {
-	
+
 	public static record PrimaryKey(
 		@NonNull String sender,
 		@NonNull String receiver,
@@ -28,15 +27,13 @@ public class MessageEntity {
 	) {}
 	
 	@Id
-	@ManyToOne(optional = false)
-	private @NonNull UserEntity sender;
+	private @NonNull String sender;
 	@Id
-	@ManyToOne(optional = false)
-	private @NonNull UserEntity receiver;
+	private @NonNull String receiver;
 	@Column
-	private @NonNull String senderEncMessage;
+	private @NonNull String message;
 	@Column
-	private @NonNull String receiverEncMessage;
+	private @NonNull String messageMimeType;
 	@Id
 	private @NonNull LocalDateTime sendTimestamp;
 	@Id
@@ -44,6 +41,6 @@ public class MessageEntity {
 	
 	public MessageEntity()
 	{
-		this(new UserEntity(), new UserEntity(), "", "", LocalDateTime.of(2026, 1, 1, 0, 0), 0);
+		this("", "", "", "", LocalDateTime.of(2026, 1, 1, 0, 0, 0, 0), 0);
 	}
 }

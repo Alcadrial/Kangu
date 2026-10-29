@@ -9,13 +9,12 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,10 @@ import com.alcadrial.kangu.api.MessagesController;
 import com.alcadrial.kangu.exception.BlockedException;
 import com.alcadrial.kangu.exception.MessageTooLongException;
 import com.alcadrial.kangu.exception.UserNotFoundException;
+import com.alcadrial.kangu.repository.MessagesRepository.Message;
 import com.alcadrial.kangu.service.MessagesService;
+
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(MessagesController.class)
 class MessagesControllerTest {
@@ -42,6 +44,8 @@ class MessagesControllerTest {
 	
 	@MockitoBean
 	private MessagesService messagesService;
+	@Autowired
+	private ObjectMapper objectMapper;
 	
 	@BeforeEach
 	public void setUp(@Autowired WebApplicationContext applicationContext)
@@ -109,29 +113,43 @@ class MessagesControllerTest {
 	@WithMockUser(username = TestConstants.USERNAME)
 	public void readLastMessages() throws Exception
 	{
+		List<Message> data = List.of(
+			new Message("m0", TestConstants.TIME_0, 0),
+			new Message("m1", TestConstants.TIME_1, 0),
+			new Message("m2", TestConstants.TIME_2, 0),
+			new Message("m3", TestConstants.TIME_3, 0),
+			new Message("m4", TestConstants.TIME_4, 0)
+		);
 		when(messagesService.readMessageByArrivalTimestamp(eq(TestConstants.USERNAME), eq(TestConstants.USERNAME1), any(), anyInt()))
-			.thenReturn(List.of("m0", "m1", "m2", "m3", "m4"));
+			.thenReturn(data);
 		
 		mockMvc
 			.perform(get("/api/messages/get?user=" + TestConstants.USERNAME1))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$").value(Matchers.contains("m0", "m1", "m2", "m3", "m4")));
+			.andExpect(content().json(objectMapper.writeValueAsString(data)));
 	}
 	
 	@Test
 	@WithMockUser(username = TestConstants.USERNAME)
 	public void readOldMessages() throws Exception
 	{
+		List<Message> data = List.of(
+			new Message("m0", TestConstants.TIME_0, 0),
+			new Message("m1", TestConstants.TIME_1, 0),
+			new Message("m2", TestConstants.TIME_2, 0),
+			new Message("m3", TestConstants.TIME_3, 0),
+			new Message("m4", TestConstants.TIME_4, 0)
+		);
 		when(messagesService.readMessageByArrivalTimestamp(eq(TestConstants.USERNAME), eq(TestConstants.USERNAME1), any(LocalDateTime.class), eq(1)))
-			.thenReturn(List.of("m0", "m1", "m2", "m3", "m4"));
+			.thenReturn(data);
 		
 		mockMvc
 			.perform(get("/api/messages/get")
 				.queryParam("user", TestConstants.USERNAME1)
-				.queryParam("before", LocalDateTime.of(2026, 1, 1, 0, 0).toString())
+				.queryParam("before", TestConstants.TIME_4.toString())
 				.queryParam("part", "1")
 			)
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$").value(Matchers.contains("m0", "m1", "m2", "m3", "m4")));
+			.andExpect(content().json(objectMapper.writeValueAsString(data)));
 	}
 }

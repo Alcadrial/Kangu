@@ -1,6 +1,5 @@
 package com.alcadrial.kangu.unit.service;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -9,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.userdetails.UserDetailsPasswordService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.GroupManager;
@@ -83,12 +84,11 @@ class AuthServiceTest {
 		when(userRepository.findById(USERNAME)).thenReturn(Optional.of(TestConstants.USER));
 		when(authenticationManager.authenticate(any())).then(invok -> invok.getArgument(0));
 		
-		assertDoesNotThrow(() -> {
-			UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD);
-			UserEntity user = authService.login(authenticationToken, false, request, response);
-			assertEquals(USERNAME, user.getUsername(), "Wrong username");
-			assertEquals(EMAIL, user.getEmail(), "Wrong email");
-		});
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD);
+		UserEntity user = authService.login(authenticationToken, false, request, response);
+		assertEquals(USERNAME, user.getUsername(), "Wrong username");
+		assertEquals(EMAIL, user.getEmail(), "Wrong email");
+		verify(securityContextRepository).saveContext(any(SecurityContext.class), eq(request), eq(response));
 	}
 	
 	@Test
@@ -103,7 +103,7 @@ class AuthServiceTest {
 	}
 	
 	@Test
-	void successRegisterAndLoginIfEnabled()
+	void successRegisterAndLoginIfEnabled() throws Exception
 	{
 		when(registrationProperties.isEnabled()).thenReturn(true);
 		when(userDetailsManager.userExists(anyString())).thenReturn(false);
@@ -119,23 +119,23 @@ class AuthServiceTest {
 			.createNew(anyString(), anyString(), anyString(), anyBoolean());
 		
 		InOrder order = inOrder(userRepository, userDetailsManager, groupManager);
-
-		assertDoesNotThrow(() -> {
-			authService.register(USERNAME, EMAIL, PASSWORD);
-			UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD);
-			UserEntity user = authService.login(authenticationToken, false, request, response);
-			assertEquals(USERNAME, user.getUsername(), "Wrong username");
-			assertEquals(EMAIL, user.getEmail(), "Wrong email");
-		});
+		
+		authService.register(USERNAME, EMAIL, PASSWORD);
 		
 		order.verify(userDetailsManager).userExists(USERNAME);
 		order.verify(userRepository).createNew(eq(USERNAME), anyString(), anyString(), anyBoolean());
 		order.verify(groupManager).addUserToGroup(USERNAME, "users");
+		
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD);
+		UserEntity user = authService.login(authenticationToken, false, request, response);
+		assertEquals(USERNAME, user.getUsername(), "Wrong username");
+		assertEquals(EMAIL, user.getEmail(), "Wrong email");
 	}
 	
 	@Test
 	void failRegisterIfDisabled()
 	{
+		when(registrationProperties.isEnabled()).thenReturn(false);
 		assertThrows(DisabledException.class, () -> {
 			authService.register(USERNAME, EMAIL, PASSWORD);
 		});

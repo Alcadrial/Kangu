@@ -1,5 +1,6 @@
 package com.alcadrial.kangu;
 
+import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -34,12 +35,31 @@ public class TestConstants {
 	public static final String MESSAGE = "message";
 	public static final String MESSAGE1 = "message1";
 	public static final String MESSAGE2 = "message2";
+	public static final String MESSAGE3 = "message3";
+	public static final String MESSAGE4 = "message4";
+	public static final String MESSAGE5 = "message5";
+	public static final String MESSAGE6 = "message6";
+	public static final String MESSAGE7 = "message7";
+	public static final String MESSAGE8 = "message8";
 	
 	public static final UserEntity USER = new UserEntity(USERNAME, PASSWORD, EMAIL);
+	public static final UserEntity USER1 = new UserEntity(USERNAME1, PASSWORD1, EMAIL1);
+	public static final UserEntity USER2 = new UserEntity(USERNAME2, PASSWORD2, EMAIL2);
 	public static final UserDetails USER_DETAILS = User.withUsername(USERNAME).password(PASSWORD).build();
 	
 	public static final String[][] CREDENTIALS_01 = crossProduct(USERNAMES_01, PASSWORDS_01);
 	public static final String[][] CREDENTIALS_ALL = crossProduct(ALL_USERNAMES, ALL_PASSWORDS);
+	
+	public static final LocalDateTime TIME_0 = LocalDateTime.of(2026, 1, 1, 0, 0);
+	public static final LocalDateTime TIME_1 = LocalDateTime.of(2026, 1, 2, 0, 0);
+	public static final LocalDateTime TIME_2 = LocalDateTime.of(2026, 1, 3, 0, 0);
+	public static final LocalDateTime TIME_3 = LocalDateTime.of(2026, 1, 4, 0, 0);
+	public static final LocalDateTime TIME_4 = LocalDateTime.of(2026, 1, 5, 0, 0);
+	public static final LocalDateTime TIME_5 = LocalDateTime.of(2026, 1, 6, 0, 0);
+	public static final LocalDateTime TIME_6 = LocalDateTime.of(2026, 1, 7, 0, 0);
+	public static final LocalDateTime TIME_7 = LocalDateTime.of(2026, 1, 8, 0, 0);
+	public static final LocalDateTime TIME_8 = LocalDateTime.of(2026, 1, 9, 0, 0);
+	public static final LocalDateTime TIME_LAST = LocalDateTime.now();
 	
 	/** <pre>username,password</pre> */
 	public static class Credentials01 implements ArgumentsProvider {
