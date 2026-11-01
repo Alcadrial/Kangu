@@ -10,10 +10,10 @@ import com.alcadrial.kangu.data.MessageEntity;
 
 public interface MessagesRepository extends CrudRepository<MessageEntity, MessageEntity.PrimaryKey> {
 	
-	public record Message(String message, LocalDateTime sendTimestamp, int partIndex) {}
+	public record Message(String sender, String receiver, String message, String messageMimeType, LocalDateTime sendTimestamp, int partIndex) {}
 	
 	@Query(nativeQuery = true, value = """
-		SELECT message, send_timestamp, part_index
+		SELECT sender, receiver, message, message_mime_type, send_timestamp, part_index
 			FROM messages
 			WHERE sender = ?1 AND
 				receiver = ?2 AND (
@@ -22,12 +22,12 @@ public interface MessagesRepository extends CrudRepository<MessageEntity, Messag
 						part_index < ?4
 				))
 			ORDER BY send_timestamp DESC, part_index DESC
-			LIMIT ?5
+			FETCH FIRST ?5 ROWS ONLY
 		""")
 	List<Message> findMessagesSentBeforeTimeAndPart(String sender, String receiver, LocalDateTime lastReadTime, int lastReadPart, int limit);
 	
 	@Query(nativeQuery = true, value = """
-		SELECT message, send_timestamp, part_index
+		SELECT sender, receiver, message, message_mime_type, send_timestamp, part_index
 			FROM messages
 			WHERE sender IN ( ?1, ?2 ) AND
 				receiver IN ( ?1, ?2 ) AND
@@ -37,12 +37,12 @@ public interface MessagesRepository extends CrudRepository<MessageEntity, Messag
 						part_index < ?4
 				))
 			ORDER BY send_timestamp DESC, part_index DESC
-			LIMIT ?5
+			FETCH FIRST ?5 ROWS ONLY
 		""")
 	List<Message> findMessagesSentOrReceivedBeforeTimeAndPart(String sender, String receiver, LocalDateTime lastReadTime, int lastReadPart, int limit);
 	
 	@Query(nativeQuery = true, value = """
-		SELECT message, send_timestamp, part_index
+		SELECT sender, receiver, message, message_mime_type, send_timestamp, part_index
 			FROM messages
 			WHERE sender = ?1 AND
 				receiver = sender AND (
@@ -51,38 +51,38 @@ public interface MessagesRepository extends CrudRepository<MessageEntity, Messag
 						part_index < ?3
 				))
 			ORDER BY send_timestamp DESC, part_index DESC
-			LIMIT ?4
+			FETCH FIRST ?4 ROWS ONLY
 		""")
 	List<Message> findMessagesSelfSentBeforeTimeAndPart(String username, LocalDateTime lastReadTime, int lastReadPart, int limit);
 	
 	@Query(nativeQuery = true, value = """
-		SELECT message, send_timestamp, part_index
+		SELECT sender, receiver, message, message_mime_type, send_timestamp, part_index
 			FROM messages
 			WHERE sender = ?1 AND
 				receiver = ?2
 			ORDER BY send_timestamp DESC, part_index DESC
-			LIMIT ?3
+			FETCH FIRST ?3 ROWS ONLY
 		""")
 	List<Message> findMessagesSent(String sender, String receiver, int limit);
 	
 	@Query(nativeQuery = true, value = """
-		SELECT message, send_timestamp, part_index
+		SELECT sender, receiver, message, message_mime_type, send_timestamp, part_index
 			FROM messages
 			WHERE sender IN ( ?1, ?2 ) AND
 				receiver IN ( ?1, ?2 ) AND
 				receiver != sender
 			ORDER BY send_timestamp DESC, part_index DESC
-			LIMIT ?3
+			FETCH FIRST ?3 ROWS ONLY
 		""")
 	List<Message> findMessagesSentOrReceived(String sender, String receiver, int limit);
 	
 	@Query(nativeQuery = true, value = """
-		SELECT message, send_timestamp, part_index
+		SELECT sender, receiver, message, message_mime_type, send_timestamp, part_index
 			FROM messages
 			WHERE sender = ?1 AND
 				receiver = sender
 			ORDER BY send_timestamp DESC, part_index DESC
-			LIMIT ?2
+			FETCH FIRST ?2 ROWS ONLY
 		""")
 	List<Message> findMessagesSelfSent(String username, int limit);
 }

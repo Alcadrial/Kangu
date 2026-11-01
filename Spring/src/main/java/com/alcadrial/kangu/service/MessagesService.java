@@ -30,21 +30,23 @@ public class MessagesService {
 	private final MessagesReadCursorsRepository messagesReadCursorsRepository;
 	private final MessagesProperties messagesProperties;
 	
-	public void sendMessage(String sender, String receiver, String message, LocalDateTime time) throws MessageTooLongException, UserNotFoundException, BlockedException
+	public MessageEntity[] sendMessage(String sender, String receiver, String message, LocalDateTime time) throws MessageTooLongException, UserNotFoundException, BlockedException
 	{
 		if (message.length() > messagesProperties.getMaxMessageSize()) throw new MessageTooLongException();
 		if (!userRepository.existsById(receiver)) throw new UserNotFoundException();
 		if (messagesReadCursorsRepository.isSenderBlocked(sender, receiver)) throw new BlockedException();
 		
 		int blockSize = messagesProperties.getMaxMessageBlockSize();
+		MessageEntity[] blocks = new MessageEntity[Math.ceilDiv(message.length(), blockSize)];
 		int partIndex = 0;
 		while (blockSize < message.length())
 		{
 			String block = message.substring(0, blockSize);
-			messagesRepository.save(new MessageEntity(sender, receiver, block, MediaType.TEXT_PLAIN_VALUE, time, partIndex++));
+			blocks[partIndex] = messagesRepository.save(new MessageEntity(sender, receiver, block, MediaType.TEXT_PLAIN_VALUE, time, partIndex++));
 			message = message.substring(blockSize);
 		}
-		messagesRepository.save(new MessageEntity(sender, receiver, message, MediaType.TEXT_PLAIN_VALUE, time, partIndex));
+		blocks[partIndex] = messagesRepository.save(new MessageEntity(sender, receiver, message, MediaType.TEXT_PLAIN_VALUE, time, partIndex));
+		return blocks;
 	}
 	
 	public void blockUser(String sender, String receiver)

@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,6 +28,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.alcadrial.kangu.TestConstants;
 import com.alcadrial.kangu.TestUtils;
 import com.alcadrial.kangu.api.MessagesController;
+import com.alcadrial.kangu.data.MessageEntity;
 import com.alcadrial.kangu.exception.BlockedException;
 import com.alcadrial.kangu.exception.MessageTooLongException;
 import com.alcadrial.kangu.exception.UserNotFoundException;
@@ -57,14 +57,20 @@ class MessagesControllerTest {
 	@WithMockUser(username = TestConstants.USERNAME)
 	public void successSendMessage() throws Exception
 	{
-		doNothing().when(messagesService).sendMessage(anyString(), anyString(), anyString(), any());
+		MessageEntity[][] data = new MessageEntity[1][];
+		when(messagesService.sendMessage(anyString(), anyString(), anyString(), any())).thenAnswer(i -> {
+			return data[0] = new MessageEntity[] {
+				new MessageEntity(i.getArgument(0), i.getArgument(1), i.getArgument(2), MediaType.TEXT_PLAIN_VALUE, i.getArgument(3), 0)
+			};
+		});
 		
 		mockMvc
 			.perform(post("/api/messages/send")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(TestUtils.plainJson("receiver", TestConstants.USERNAME1, "message", TestConstants.MESSAGE1))
 			)
-			.andExpect(status().isNoContent());
+			.andExpect(status().isOk())
+			.andExpect(content().json(objectMapper.writeValueAsString(data[0])));
 	}
 	
 	@Test
@@ -114,11 +120,11 @@ class MessagesControllerTest {
 	public void readLastMessages() throws Exception
 	{
 		List<Message> data = List.of(
-			new Message("m0", TestConstants.TIME_0, 0),
-			new Message("m1", TestConstants.TIME_1, 0),
-			new Message("m2", TestConstants.TIME_2, 0),
-			new Message("m3", TestConstants.TIME_3, 0),
-			new Message("m4", TestConstants.TIME_4, 0)
+			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m0", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_0, 0),
+			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m1", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_1, 0),
+			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m2", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_2, 0),
+			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m3", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_3, 0),
+			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m4", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_4, 0)
 		);
 		when(messagesService.readMessageByArrivalTimestamp(eq(TestConstants.USERNAME), eq(TestConstants.USERNAME1), any(), anyInt()))
 			.thenReturn(data);
@@ -134,11 +140,11 @@ class MessagesControllerTest {
 	public void readOldMessages() throws Exception
 	{
 		List<Message> data = List.of(
-			new Message("m0", TestConstants.TIME_0, 0),
-			new Message("m1", TestConstants.TIME_1, 0),
-			new Message("m2", TestConstants.TIME_2, 0),
-			new Message("m3", TestConstants.TIME_3, 0),
-			new Message("m4", TestConstants.TIME_4, 0)
+			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m0", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_0, 0),
+			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m1", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_1, 0),
+			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m2", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_2, 0),
+			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m3", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_3, 0),
+			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m4", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_4, 0)
 		);
 		when(messagesService.readMessageByArrivalTimestamp(eq(TestConstants.USERNAME), eq(TestConstants.USERNAME1), any(LocalDateTime.class), eq(1)))
 			.thenReturn(data);

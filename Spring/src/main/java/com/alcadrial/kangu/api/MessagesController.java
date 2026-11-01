@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alcadrial.kangu.data.MessageEntity;
 import com.alcadrial.kangu.repository.MessagesRepository.Message;
 import com.alcadrial.kangu.service.MessagesService;
 
@@ -31,8 +32,8 @@ public class MessagesController {
 	@PostMapping("/send")
 	ResponseEntity<?> postSend(@AuthenticationPrincipal User user, @RequestBody MessageData body) throws Exception
 	{
-		messagesService.sendMessage(user.getUsername(), body.receiver(), body.message(), LocalDateTime.now(ZoneId.ofOffset("UTC", ZoneOffset.ofHours(0))));
-		return ResponseEntity.ok().build();
+		MessageEntity[] message = messagesService.sendMessage(user.getUsername(), body.receiver(), body.message(), LocalDateTime.now(ZoneId.ofOffset("UTC", ZoneOffset.ofHours(0))));
+		return ResponseEntity.ok(message);
 	}
 	
 	record MessageData(String receiver, String message) {}
