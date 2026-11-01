@@ -34,7 +34,7 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import com.alcadrial.kangu.TestConstants;
 import com.alcadrial.kangu.TestUtils;
 import com.alcadrial.kangu.data.UserEntity;
-import com.alcadrial.kangu.exception.DisabledException;
+import com.alcadrial.kangu.exception.DisabledServiceException;
 import com.alcadrial.kangu.properties.RegistrationProperties;
 import com.alcadrial.kangu.repository.UserRepository;
 import com.alcadrial.kangu.service.AuthService;
@@ -136,7 +136,7 @@ class AuthServiceTest {
 	void failRegisterIfDisabled()
 	{
 		when(registrationProperties.isEnabled()).thenReturn(false);
-		assertThrows(DisabledException.class, () -> {
+		assertThrows(DisabledServiceException.class, () -> {
 			authService.register(USERNAME, EMAIL, PASSWORD);
 		});
 	}

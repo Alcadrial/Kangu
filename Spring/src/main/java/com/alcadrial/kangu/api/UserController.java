@@ -9,15 +9,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import tools.jackson.databind.ObjectMapper;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/api/user")
 @RestController
 public class UserController {
 	
-	private ObjectMapper objectMapper;
+	final ObjectMapper objectMapper;
 	
 	@GetMapping
 	ResponseEntity<?> get(@AuthenticationPrincipal @Nullable Object principal)

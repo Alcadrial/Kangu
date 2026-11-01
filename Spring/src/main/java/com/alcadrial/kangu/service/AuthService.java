@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alcadrial.kangu.data.UserEntity;
-import com.alcadrial.kangu.exception.DisabledException;
+import com.alcadrial.kangu.exception.DisabledServiceException;
 import com.alcadrial.kangu.exception.DuplicateKeyException;
 import com.alcadrial.kangu.properties.RegistrationProperties;
 import com.alcadrial.kangu.repository.UserRepository;
@@ -46,9 +46,9 @@ public class AuthService {
 	private final AuthenticationManager authenticationManager;
 	private final SecurityContextRepository securityContextRepository;
 	
-	public void register(String username, String email, String password) throws DuplicateKeyException, DisabledException
+	public void register(String username, String email, String password) throws DuplicateKeyException, DisabledServiceException
 	{
-		if (!properties.isEnabled()) throw new DisabledException();
+		if (!properties.isEnabled()) throw new DisabledServiceException();
 		
 		String passwordHash = (@NonNull String) passwordEncoder.encode(password);
 		

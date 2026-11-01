@@ -40,9 +40,9 @@ dependencies {
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 	runtimeOnly("com.h2database:h2")
-	runtimeOnly("org.postgresql:postgresql")
-	runtimeOnly("com.ibm.db2:jcc")
-	runtimeOnly("com.microsoft.sqlserver:mssql-jdbc")
+	//runtimeOnly("org.postgresql:postgresql")
+	//runtimeOnly("com.ibm.db2:jcc")
+	//runtimeOnly("com.microsoft.sqlserver:mssql-jdbc")
 	runtimeOnly("com.oracle.database.jdbc:ojdbc17")
 	
 	annotationProcessor("org.projectlombok:lombok")

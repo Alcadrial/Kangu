@@ -5,6 +5,7 @@ import java.net.URI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,23 +20,20 @@ import com.alcadrial.kangu.service.AuthService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/api/delete")
 @RestController
 public class DeleteController {
 	
-	private AuthService authService;
-	private SecurityContextRepository securityContextRepository;
+	final AuthService authService;
+	final SecurityContextRepository securityContextRepository;
 	
 	@PostMapping
 	ResponseEntity<?> post(@RequestBody Request body, @Autowired HttpServletResponse response, @Autowired HttpServletRequest request, @AuthenticationPrincipal User user)
 	{
-		if (!authService.deleteUserIfPasswordMatches(user.getUsername(), body.password))
-		{
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-		}
+		if (!authService.deleteUserIfPasswordMatches(user.getUsername(), body.password)) throw new BadCredentialsException("Failed to authenticate the user to be deleted");
 		
 		SecurityContext securityContext = SecurityContextHolder.getContext();
 		securityContext.setAuthentication(null);

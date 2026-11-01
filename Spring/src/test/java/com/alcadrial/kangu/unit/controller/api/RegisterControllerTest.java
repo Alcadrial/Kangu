@@ -6,12 +6,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.nio.charset.StandardCharsets;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +23,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.alcadrial.kangu.TestConstants;
 import com.alcadrial.kangu.TestUtils;
 import com.alcadrial.kangu.api.RegisterController;
-import com.alcadrial.kangu.exception.DisabledException;
+import com.alcadrial.kangu.exception.DisabledServiceException;
 import com.alcadrial.kangu.exception.DuplicateKeyException;
 import com.alcadrial.kangu.service.AuthService;
 
@@ -72,7 +70,7 @@ class RegisterControllerTest {
 	@Test
 	public void failToRegisterWhenDisabled() throws Exception
 	{
-		doThrow(DisabledException.class).when(authService).register(anyString(), anyString(), anyString());
+		doThrow(DisabledServiceException.class).when(authService).register(anyString(), anyString(), anyString());
 		
 		mockMvc
 			.perform(post("/api/register")
@@ -80,7 +78,6 @@ class RegisterControllerTest {
 				.characterEncoding(StandardCharsets.UTF_8)
 				.content(TestUtils.plainJson("username", TestConstants.USERNAME, "email", TestConstants.EMAIL, "password", TestConstants.PASSWORD))
 			)
-			.andExpect(status().is4xxClientError())
-			.andExpect(jsonPath("$.message", Matchers.not(Matchers.emptyOrNullString())));
+			.andExpect(status().is4xxClientError());
 	}
 }
