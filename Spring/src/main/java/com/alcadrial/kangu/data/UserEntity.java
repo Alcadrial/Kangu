@@ -46,4 +46,13 @@ public class UserEntity {
 	{
 		this(username, password, email, true, LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), OnlineStatus.ON);
 	}
+	
+	public static record Safe(
+		@NonNull String username,
+		@NonNull String email,
+		@Nonnull LocalDateTime registrationTime,
+		@Nonnull LocalDateTime lastAccessTime,
+		@Nonnull LocalDateTime lastActionTime,
+		@Nonnull OnlineStatus onlineStatus
+	) {}
 }

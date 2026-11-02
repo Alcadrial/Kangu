@@ -45,7 +45,7 @@ class LoginLogoutFlowTest {
 	void flow() throws Exception
 	{
 		restClient
-			.get().uri("/api/user")
+			.get().uri("/api/auth")
 			.exchange()
 			.expectStatus().isOk()
 			.expectBody(AnonymousSessionData.class)
@@ -61,7 +61,7 @@ class LoginLogoutFlowTest {
 			.body(TestUtils.plainJson("username", TestConstants.USERNAME, "password", TestConstants.PASSWORD))
 			.exchangeSuccessfully();
 		restClient
-			.get().uri("/api/user")
+			.get().uri("/api/auth")
 			.exchange()
 			.expectStatus().isOk()
 			.expectBody(UserSessionData.class)
@@ -77,7 +77,7 @@ class LoginLogoutFlowTest {
 			.exchange()
 			.expectStatus().is3xxRedirection();
 		restClient
-			.get().uri("/api/user")
+			.get().uri("/api/auth")
 			.exchange()
 			.expectStatus().isOk()
 			.expectBody(AnonymousSessionData.class)

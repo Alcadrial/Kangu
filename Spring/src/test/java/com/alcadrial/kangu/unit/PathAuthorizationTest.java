@@ -34,14 +34,18 @@ class PathAuthorizationTest {
 		ResponseEntity<?> loginPost();
 		@PostMapping("/api/register")
 		ResponseEntity<?> registerPost();
-		@GetMapping("/api/user")
-		ResponseEntity<?> userGet();
+		@GetMapping("/api/auth")
+		ResponseEntity<?> authGet();
 		
 		//user urls
 		@PostMapping("/api/delete")
 		ResponseEntity<?> deletePost();
 		@PostMapping("/api/messages/send")
 		ResponseEntity<?> messagesSendPost();
+		@GetMapping("/api/user")
+		ResponseEntity<?> userGet();
+		@PostMapping("/api/user/changeEmail")
+		ResponseEntity<?> userChangeEmail();
 		
 		//admin routes
 		@GetMapping("/api/admin")
@@ -66,7 +70,7 @@ class PathAuthorizationTest {
 		mockMvc.perform(post("/api/register").with(csrf())).andExpect(status().isOk());
 		
 		when(controller.userGet()).thenReturn(ResponseEntity.ok().build());
-		mockMvc.perform(get("/api/user")).andExpect(status().isOk());
+		mockMvc.perform(get("/api/auth")).andExpect(status().isOk());
 	}
 	
 	@Test
@@ -80,6 +84,12 @@ class PathAuthorizationTest {
 		
 		when(controller.adminGet()).thenReturn(ResponseEntity.ok().build());
 		mockMvc.perform(get("/api/admin").with(csrf())).andExpect(status().isForbidden());
+		
+		when(controller.adminGet()).thenReturn(ResponseEntity.ok().build());
+		mockMvc.perform(get("/api/user").with(csrf())).andExpect(status().isForbidden());
+		
+		when(controller.adminGet()).thenReturn(ResponseEntity.ok().build());
+		mockMvc.perform(post("/api/user/changeEmail").with(csrf())).andExpect(status().isForbidden());
 	}
 	
 	@Test
@@ -91,6 +101,12 @@ class PathAuthorizationTest {
 		
 		when(controller.messagesSendPost()).thenReturn(ResponseEntity.ok().build());
 		mockMvc.perform(post("/api/messages/send").with(csrf())).andExpect(status().isOk());
+		
+		when(controller.messagesSendPost()).thenReturn(ResponseEntity.ok().build());
+		mockMvc.perform(get("/api/user").with(csrf())).andExpect(status().isOk());
+		
+		when(controller.messagesSendPost()).thenReturn(ResponseEntity.ok().build());
+		mockMvc.perform(post("/api/user/changeEmail").with(csrf())).andExpect(status().isOk());
 	}
 	
 	@Test

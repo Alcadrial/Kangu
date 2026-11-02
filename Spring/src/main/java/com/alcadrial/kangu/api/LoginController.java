@@ -32,10 +32,10 @@ public class LoginController {
 		Authentication authenticationToken = UsernamePasswordAuthenticationToken.unauthenticated(body.username, body.password);
 		
 		UserEntity user = authService.login(authenticationToken, body.rememberMe.orElse(false), request, response);
-		return ResponseEntity.ok(new Response(user.getUsername(), user.getEmail(), authService.getAuthorities().stream().map(GrantedAuthority::getAuthority).toArray(String[]::new)));
+		return ResponseEntity.ok(new Response(user.getUsername(), authService.getAuthorities().stream().map(GrantedAuthority::getAuthority).toArray(String[]::new)));
 	}
 	
 	record Request(String username, String password, Optional<Boolean> rememberMe) {}
 	
-	record Response(String username, String email, String[] authorities) {}
+	record Response(String username, String[] authorities) {}
 }

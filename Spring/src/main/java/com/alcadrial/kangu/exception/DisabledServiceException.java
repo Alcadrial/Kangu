@@ -1,6 +1,6 @@
 package com.alcadrial.kangu.exception;
 
-public class DisabledServiceException extends Exception {
+public class DisabledServiceException extends RuntimeException {
 	
 	public DisabledServiceException()
 	{}

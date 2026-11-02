@@ -1,5 +1,7 @@
 package com.alcadrial.kangu;
 
+import java.util.NoSuchElementException;
+
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,11 +24,10 @@ import lombok.RequiredArgsConstructor;
 @RestControllerAdvice
 public class ExceptionHandlerController {
 	
-	
 	public record ErrorResponse(String errorCode, String message) {}
-
+	
 	final Environment env;
-
+	
 	@ExceptionHandler
 	ResponseEntity<?> handler(BadCredentialsException e)
 	{
@@ -66,7 +67,7 @@ public class ExceptionHandlerController {
 	@ExceptionHandler
 	ResponseEntity<?> handler(UserNotFoundException e)
 	{
-		return ResponseEntity.notFound().build();
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(Constants.NOT_FOUND_ERROR_CODE, Constants.EMPTY_MESSAGE));
 	}
 	
 	@ExceptionHandler
@@ -74,10 +75,16 @@ public class ExceptionHandlerController {
 	{
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(Constants.BLOCKED_CHAT_ERROR_CODE, Constants.EMPTY_MESSAGE));
 	}
-
+	
+	@ExceptionHandler
+	ResponseEntity<?> handler(NoSuchElementException e)
+	{
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(Constants.NOT_FOUND_ERROR_CODE, Constants.EMPTY_MESSAGE));
+	}
+	
 	@ExceptionHandler
 	ResponseEntity<?> unknownErrorRequest(Exception e)
 	{
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(Constants.KNOWN_INTERNAL_ERROR_CODE, Constants.EMPTY_MESSAGE));
 	}
 }

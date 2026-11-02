@@ -63,7 +63,7 @@ public class TestUtils {
 	public static void assertValidUserSession(RestTestClient restClient, String principal)
 	{
 		restClient
-			.get().uri("/api/user")
+			.get().uri("/api/auth")
 			.exchange()
 			.expectStatus().isOk()
 			.expectBody(UserSessionData.class)

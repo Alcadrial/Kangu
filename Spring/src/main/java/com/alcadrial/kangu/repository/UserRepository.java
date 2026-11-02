@@ -1,5 +1,7 @@
 package com.alcadrial.kangu.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -15,4 +17,6 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
 			VALUES (?1, ?2, ?3, ?4)
 		""")
 	void createNew(String username, String password, String email, boolean enabled);
+	
+	Optional<UserEntity.Safe> findByUsername(String username);
 }
