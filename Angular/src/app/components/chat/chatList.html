@@ -1,0 +1,22 @@
+<div class="size-full border-r border-neutral-700">
+    <div class="w-full p-2 flex flex-col divide-y overflow-y-auto">
+        @for (user of users(); track user.username) {
+            <chat-list-item [user]="user" class="border-neutral-700 cursor-pointer" (click)="openChat(user.username)" />
+        }
+        <wa-button appearance="plain" (click)="openCreateConversationModal()">
+            <span>New conversation</span>
+        </wa-button>
+
+        <wa-dialog label="Start a new conversation" [open]="isCreateConversationModalOpen()" (wa-after-hide)="closeCreateConversationModal()">
+            <form (submit)="createNewConversation($event)">
+                <wa-input 
+                    label="User"
+                    [value]="newChatForm.username"
+                    (input)="setUsername($event)"
+                ></wa-input>
+                akka {{newChatUsername().username}}
+                <wa-button [disabled]="!newChatForm().value().username">Start chatting</wa-button>
+            </form>
+        </wa-dialog>
+    </div>
+</div>

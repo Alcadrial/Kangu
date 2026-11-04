@@ -1,0 +1,10 @@
+<div class="size-full flex flex-col">
+    <div class="p-4 flex flex-col text-md">
+        <span class="truncate">{{ user().username }}</span>
+        <div class="p-2 flex flex-row justify-between gap-2 text-sm text-neutral-300">
+            <span class="truncate">{{ user().lastMessage }}</span>
+            <span class="truncate">{{ user().lastMessageTime.toLocaleString() }}</span>
+        </div>
+
+    </div>
+</div>
