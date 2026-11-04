@@ -126,7 +126,7 @@ class MessagesControllerTest {
 			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m3", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_3, 0),
 			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m4", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_4, 0)
 		);
-		when(messagesService.readMessageByArrivalTimestamp(eq(TestConstants.USERNAME), eq(TestConstants.USERNAME1), any(), anyInt()))
+		when(messagesService.readChatDetailsAndMessagesByArrivalTimestamp(eq(TestConstants.USERNAME), eq(TestConstants.USERNAME1), any(), anyInt()))
 			.thenReturn(data);
 		
 		mockMvc
@@ -146,7 +146,7 @@ class MessagesControllerTest {
 			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m3", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_3, 0),
 			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m4", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_4, 0)
 		);
-		when(messagesService.readMessageByArrivalTimestamp(eq(TestConstants.USERNAME), eq(TestConstants.USERNAME1), any(LocalDateTime.class), eq(1)))
+		when(messagesService.readChatDetailsAndMessagesByArrivalTimestamp(eq(TestConstants.USERNAME), eq(TestConstants.USERNAME1), any(LocalDateTime.class), eq(1)))
 			.thenReturn(data);
 		
 		mockMvc

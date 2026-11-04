@@ -27,6 +27,7 @@ public class Constants {
 	public static final String DUPLICATED_VALUE_ERROR_CODE = CLIENT_ERROR_CODE + "001";
 	public static final String VALUE_TOO_BIG_ERROR_CODE = CLIENT_ERROR_CODE + "002";
 	public static final String BLOCKED_CHAT_ERROR_CODE = CLIENT_ERROR_CODE + "003";
+	public static final String MISSING_DATA_ERROR_CODE = CLIENT_ERROR_CODE + "004";
 	
 	public static final String UNKNOWN_ERROR_CODE = "FF";
 	

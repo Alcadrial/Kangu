@@ -3,6 +3,7 @@ package com.alcadrial.kangu.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import com.alcadrial.kangu.exception.MessageTooLongException;
 import com.alcadrial.kangu.exception.UserNotFoundException;
 import com.alcadrial.kangu.properties.MessagesProperties;
 import com.alcadrial.kangu.repository.MessagesReadCursorsRepository;
+import com.alcadrial.kangu.repository.MessagesReadCursorsRepository.MessageReadCursorData;
 import com.alcadrial.kangu.repository.MessagesRepository;
 import com.alcadrial.kangu.repository.MessagesRepository.Message;
 import com.alcadrial.kangu.repository.UserRepository;
@@ -59,22 +61,37 @@ public class MessagesService {
 		messagesReadCursorsRepository.updateBlockedStatus(sender, receiver, false);
 	}
 	
-	public List<Message> readMessageByArrivalTimestamp(String sender, String receiver, @Nullable LocalDateTime time, int part)
+	public static record ChatDetailsAndMessages(
+		List<Message> messages,
+		@Nullable MessageReadCursorData details
+	) {}
+	
+	public ChatDetailsAndMessages readChatDetailsAndMessagesByArrivalTimestamp(String sender, String receiver, @Nullable LocalDateTime time, int part)
 	{
 		int limit = messagesProperties.getMaxBulkMessagesCount();
-		if (time == null)
-		{
-			if (sender.equals(receiver))
-			{
-				return messagesRepository.findMessagesSelfSent(sender, limit);
-			}
-			return messagesRepository.findMessagesSentOrReceived(sender, receiver, limit);
-		}
 		
-		if (sender.equals(receiver))
-		{
-			return messagesRepository.findMessagesSelfSentBeforeTimeAndPart(sender, time, part, limit);
-		}
-		return messagesRepository.findMessagesSentOrReceivedBeforeTimeAndPart(sender, receiver, time, part, limit);
+		int bit0 = time == null ? 1 : 0;
+		int bit1 = sender.equals(receiver) ? 1 : 0;
+		int key = bit1 << 1 | bit0;
+		
+		List<Message> messages = switch (key) {
+			case 0 -> messagesRepository.findMessagesSentOrReceivedBeforeTimeAndPart(sender, receiver, (@NonNull LocalDateTime) time, part, limit);
+			case 1 -> messagesRepository.findMessagesSentOrReceived(sender, receiver, limit);
+			case 2 -> messagesRepository.findMessagesSelfSentBeforeTimeAndPart(sender, (@NonNull LocalDateTime) time, part, limit);
+			case 3 -> messagesRepository.findMessagesSelfSent(sender, limit);
+			default -> throw new IllegalArgumentException("Unexpected value: " + key);
+		};
+		
+		if (key != 0) return new ChatDetailsAndMessages(messages, null);
+		
+		MessageReadCursorData data = messagesReadCursorsRepository.findById(sender, receiver);
+		if (data == null) throw new IllegalStateException("Missing read cursor of chat between " + sender + " and " + receiver);
+		
+		return new ChatDetailsAndMessages(messages, data);
+	}
+	
+	public List<MessageReadCursorData> readChatsOfUser(String username)
+	{
+		return messagesReadCursorsRepository.findAllUserChats(username);
 	}
 }

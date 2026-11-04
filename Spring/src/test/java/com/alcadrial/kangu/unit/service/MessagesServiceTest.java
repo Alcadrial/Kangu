@@ -119,18 +119,18 @@ class MessagesServiceTest {
 	{
 		when(messagesProperties.getMaxBulkMessagesCount()).thenReturn(10);
 		
-		messagesService.readMessageByArrivalTimestamp(SENDER, SENDER, null, 0);
+		messagesService.readChatDetailsAndMessagesByArrivalTimestamp(SENDER, SENDER, null, 0);
 		verify(messagesRepository).findMessagesSelfSent(SENDER, 10);
 		
-		messagesService.readMessageByArrivalTimestamp(SENDER, RECEIVER, null, 0);
+		messagesService.readChatDetailsAndMessagesByArrivalTimestamp(SENDER, RECEIVER, null, 0);
 		verify(messagesRepository).findMessagesSentOrReceived(SENDER, RECEIVER, 10);
 		
 		LocalDateTime time = LocalDateTime.now();
 		
-		messagesService.readMessageByArrivalTimestamp(SENDER, SENDER, time, 1);
+		messagesService.readChatDetailsAndMessagesByArrivalTimestamp(SENDER, SENDER, time, 1);
 		verify(messagesRepository).findMessagesSelfSentBeforeTimeAndPart(SENDER, time, 1, 10);
 		
-		messagesService.readMessageByArrivalTimestamp(SENDER, RECEIVER, time, 1);
+		messagesService.readChatDetailsAndMessagesByArrivalTimestamp(SENDER, RECEIVER, time, 1);
 		verify(messagesRepository).findMessagesSentOrReceivedBeforeTimeAndPart(SENDER, RECEIVER, time, 1, 10);
 	}
 }

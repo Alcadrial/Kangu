@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -80,6 +81,12 @@ public class ExceptionHandlerController {
 	ResponseEntity<?> handler(NoSuchElementException e)
 	{
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(Constants.NOT_FOUND_ERROR_CODE, Constants.EMPTY_MESSAGE));
+	}
+	
+	@ExceptionHandler
+	ResponseEntity<?> handler(MissingServletRequestParameterException e)
+	{
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(Constants.MISSING_DATA_ERROR_CODE, Constants.EMPTY_MESSAGE));
 	}
 	
 	@ExceptionHandler

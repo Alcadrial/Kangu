@@ -1,5 +1,9 @@
 package com.alcadrial.kangu.repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -30,4 +34,36 @@ public interface MessagesReadCursorsRepository extends CrudRepository<MessageRea
 		""")
 	boolean isSenderBlocked(String sender, String receiver);
 	
+	record MessageReadCursorData(
+		LocalDateTime receiveTimestampOther,
+		LocalDateTime readTimestampSelf,
+		LocalDateTime readTimestampOther,
+		boolean isBlockedBySelf,
+		boolean isBlockedByOther
+	) {}
+	
+	@Query("""
+		SELECT t.receiveTimestamp as receiveTimestampOther, t.readTimestamp as readTimestampSelf,
+			s.readTimestamp as readTimestampOther, t.isBlocked as isBlockedByOther, s.isBlocked as isBlockedBySelf
+			FROM MessageReadCursorEntity t, MessageReadCursorEntity s
+			WHERE t.sender = ?1 AND
+				t.receiver = ?2 AND
+				s.sender = ?2 AND
+				s.receiver = ?1
+		""")
+	@Nullable MessageReadCursorData findById(String sender, String receiver);
+	
+	@Query("""
+		SELECT new com.alcadrial.kangu.repository.MessagesReadCursorsRepository$MessageReadCursorData(t.receiveTimestamp AS receiveTimestampOther, t.readTimestamp AS readTimestampSelf,
+			s.readTimestamp AS readTimestampOther, t.isBlocked AS isBlockedByOther, s.isBlocked AS isBlockedBySelf)
+			FROM MessageReadCursorEntity t, MessageReadCursorEntity s
+			WHERE (t.sender = ?1 AND s.receiver != ?1) OR
+				(t.receiver = ?1 AND s.sender != ?1)
+		UNION ALL
+		SELECT new com.alcadrial.kangu.repository.MessagesReadCursorsRepository$MessageReadCursorData(local_datetime, local_datetime, local_datetime, false, false)
+			FROM MessageReadCursorEntity t
+			WHERE t.sender = ?1 AND
+				t.receiver = ?1
+		""")
+	List<MessageReadCursorData> findAllUserChats(String username);
 }
