@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alcadrial.kangu.data.MessageEntity;
-import com.alcadrial.kangu.repository.MessagesReadCursorsRepository.MessageReadCursorData;
+import com.alcadrial.kangu.repository.MessagesReadCursorsRepository.ChatPreviewData;
 import com.alcadrial.kangu.service.MessagesService;
 import com.alcadrial.kangu.service.MessagesService.ChatDetailsAndMessages;
 
@@ -47,9 +47,9 @@ public class MessagesController {
 	}
 	
 	@GetMapping("/chats")
-	ResponseEntity<List<MessageReadCursorData>> getChats(@AuthenticationPrincipal User user)
+	ResponseEntity<List<ChatPreviewData>> getChats(@AuthenticationPrincipal User user)
 	{
-		List<MessageReadCursorData> messages = messagesService.readChatsOfUser(user.getUsername());
+		List<ChatPreviewData> messages = messagesService.getChatsPreviews(user.getUsername());
 		return ResponseEntity.ok(messages);
 	}
 }

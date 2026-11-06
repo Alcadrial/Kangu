@@ -1,6 +1,7 @@
 package com.alcadrial.kangu.service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 import org.jspecify.annotations.NonNull;
@@ -10,11 +11,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alcadrial.kangu.data.MessageEntity;
+import com.alcadrial.kangu.data.MessageReadCursorEntity.PrimaryKey;
 import com.alcadrial.kangu.exception.BlockedException;
 import com.alcadrial.kangu.exception.MessageTooLongException;
+import com.alcadrial.kangu.exception.MessagesCursorNotFoundException;
 import com.alcadrial.kangu.exception.UserNotFoundException;
 import com.alcadrial.kangu.properties.MessagesProperties;
 import com.alcadrial.kangu.repository.MessagesReadCursorsRepository;
+import com.alcadrial.kangu.repository.MessagesReadCursorsRepository.ChatPreviewData;
 import com.alcadrial.kangu.repository.MessagesReadCursorsRepository.MessageReadCursorData;
 import com.alcadrial.kangu.repository.MessagesRepository;
 import com.alcadrial.kangu.repository.MessagesRepository.Message;
@@ -36,7 +40,7 @@ public class MessagesService {
 	{
 		if (message.length() > messagesProperties.getMaxMessageSize()) throw new MessageTooLongException();
 		if (!userRepository.existsById(receiver)) throw new UserNotFoundException();
-		if (messagesReadCursorsRepository.isSenderBlocked(sender, receiver)) throw new BlockedException();
+		if (messagesReadCursorsRepository.isSenderBlocked(sender, receiver).orElse(false)) throw new BlockedException();
 		
 		int blockSize = messagesProperties.getMaxMessageBlockSize();
 		MessageEntity[] blocks = new MessageEntity[Math.ceilDiv(message.length(), blockSize)];
@@ -53,12 +57,12 @@ public class MessagesService {
 	
 	public void blockUser(String sender, String receiver)
 	{
-		messagesReadCursorsRepository.updateBlockedStatus(sender, receiver, true);
+		messagesReadCursorsRepository.findById(new PrimaryKey(sender, receiver)).ifPresent(e -> e.setBlocked(true));
 	}
 	
 	public void unblockUser(String sender, String receiver)
 	{
-		messagesReadCursorsRepository.updateBlockedStatus(sender, receiver, false);
+		messagesReadCursorsRepository.findById(new PrimaryKey(sender, receiver)).ifPresent(e -> e.setBlocked(false));
 	}
 	
 	public static record ChatDetailsAndMessages(
@@ -66,6 +70,7 @@ public class MessagesService {
 		@Nullable MessageReadCursorData details
 	) {}
 	
+	@Transactional(readOnly = true)
 	public ChatDetailsAndMessages readChatDetailsAndMessagesByArrivalTimestamp(String sender, String receiver, @Nullable LocalDateTime time, int part)
 	{
 		int limit = messagesProperties.getMaxBulkMessagesCount();
@@ -84,14 +89,22 @@ public class MessagesService {
 		
 		if (key != 0) return new ChatDetailsAndMessages(messages, null);
 		
-		MessageReadCursorData data = messagesReadCursorsRepository.findById(sender, receiver);
-		if (data == null) throw new IllegalStateException("Missing read cursor of chat between " + sender + " and " + receiver);
+		MessageReadCursorData data = messagesReadCursorsRepository.findById(sender, receiver).orElseThrow(() -> new MessagesCursorNotFoundException("Missing read cursor of chat between " + sender + " and " + receiver));
 		
 		return new ChatDetailsAndMessages(messages, data);
 	}
 	
-	public List<MessageReadCursorData> readChatsOfUser(String username)
+
+	@Transactional(readOnly = true)
+	public List<ChatPreviewData> getChatsPreviews(String username)
 	{
-		return messagesReadCursorsRepository.findAllUserChats(username);
+		List<ChatPreviewData> dataWithDuplicates = messagesReadCursorsRepository.getChatPreviewDataWithDuplicates(username);
+		HashMap<String, ChatPreviewData> uniqueChats = new HashMap<>();
+		for (ChatPreviewData chat : dataWithDuplicates)
+		{
+			uniqueChats.merge(chat.username(), chat, (v0, v1) -> v0.messageTimestamp().isBefore(v1.messageTimestamp()) ? v1 : v0);
+		}
+		
+		return List.copyOf(uniqueChats.values());
 	}
 }

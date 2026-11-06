@@ -16,6 +16,7 @@ import com.alcadrial.kangu.exception.BlockedException;
 import com.alcadrial.kangu.exception.DisabledServiceException;
 import com.alcadrial.kangu.exception.DuplicateKeyException;
 import com.alcadrial.kangu.exception.MessageTooLongException;
+import com.alcadrial.kangu.exception.MessagesCursorNotFoundException;
 import com.alcadrial.kangu.exception.UserNotFoundException;
 import com.alcadrial.kangu.utils.Constants;
 
@@ -79,6 +80,12 @@ public class ExceptionHandlerController {
 	
 	@ExceptionHandler
 	ResponseEntity<?> handler(NoSuchElementException e)
+	{
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(Constants.NOT_FOUND_ERROR_CODE, Constants.EMPTY_MESSAGE));
+	}
+	
+	@ExceptionHandler
+	ResponseEntity<?> handler(MessagesCursorNotFoundException e)
 	{
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(Constants.NOT_FOUND_ERROR_CODE, Constants.EMPTY_MESSAGE));
 	}
