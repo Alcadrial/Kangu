@@ -14,7 +14,6 @@ import com.alcadrial.kangu.data.MessageEntity;
 import com.alcadrial.kangu.data.MessageReadCursorEntity.PrimaryKey;
 import com.alcadrial.kangu.exception.BlockedException;
 import com.alcadrial.kangu.exception.MessageTooLongException;
-import com.alcadrial.kangu.exception.MessagesCursorNotFoundException;
 import com.alcadrial.kangu.exception.UserNotFoundException;
 import com.alcadrial.kangu.properties.MessagesProperties;
 import com.alcadrial.kangu.repository.MessagesReadCursorsRepository;
@@ -87,9 +86,10 @@ public class MessagesService {
 			default -> throw new IllegalArgumentException("Unexpected value: " + key);
 		};
 		
-		if (key != 0) return new ChatDetailsAndMessages(messages, null);
+		if (key != 1) return new ChatDetailsAndMessages(messages, null);
 		
-		MessageReadCursorData data = messagesReadCursorsRepository.findById(sender, receiver).orElseThrow(() -> new MessagesCursorNotFoundException("Missing read cursor of chat between " + sender + " and " + receiver));
+		LocalDateTime currentTime = LocalDateTime.now();
+		MessageReadCursorData data = messagesReadCursorsRepository.findById(sender, receiver).orElse(new MessageReadCursorData(currentTime, currentTime, currentTime, false, false));
 		
 		return new ChatDetailsAndMessages(messages, data);
 	}

@@ -10,7 +10,22 @@ import com.alcadrial.kangu.data.MessageEntity;
 
 public interface MessagesRepository extends CrudRepository<MessageEntity, MessageEntity.PrimaryKey> {
 	
-	public record Message(String sender, String receiver, String message, String messageMimeType, LocalDateTime sendTimestamp, int partIndex) {}
+	/**
+	 * @param sender The user that sent this message
+	 * @param receiver The user that receive this message
+	 * @param message The raw message, may not be the full message
+	 * @param mimeType The mime type of this message
+	 * @param sendTimestamp The timestamp at which this message was received by the server
+	 * @param partIndex An positive integer used to compose a message split into multiple parts to allow multiple mime types in the same message
+	 */
+	public record Message(
+		String sender,
+		String receiver,
+		String message,
+		String messageMimeType,
+		LocalDateTime sendTimestamp,
+		int partIndex
+	) {}
 	
 	@Query(nativeQuery = true, value = """
 		SELECT sender, receiver, message, message_mime_type, send_timestamp, part_index

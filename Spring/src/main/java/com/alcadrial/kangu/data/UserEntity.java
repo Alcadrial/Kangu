@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import org.jspecify.annotations.NonNull;
 
-import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
@@ -28,14 +27,14 @@ public class UserEntity {
 	@Column
 	private boolean enabled;
 	@Column
-	private @Nonnull LocalDateTime registrationTime;
+	private @NonNull LocalDateTime registrationTime;
 	@Column
-	private @Nonnull LocalDateTime lastAccessTime;
+	private @NonNull LocalDateTime lastAccessTime;
 	@Column
-	private @Nonnull LocalDateTime lastActionTime;
+	private @NonNull LocalDateTime lastActionTime;
 	@Column
 	@Enumerated
-	private @Nonnull OnlineStatus onlineStatus;
+	private @NonNull OnlineStatus onlineStatus;
 	
 	public UserEntity()
 	{
@@ -50,9 +49,9 @@ public class UserEntity {
 	public static record Safe(
 		@NonNull String username,
 		@NonNull String email,
-		@Nonnull LocalDateTime registrationTime,
-		@Nonnull LocalDateTime lastAccessTime,
-		@Nonnull LocalDateTime lastActionTime,
-		@Nonnull OnlineStatus onlineStatus
+		@NonNull LocalDateTime registrationTime,
+		@NonNull LocalDateTime lastAccessTime,
+		@NonNull LocalDateTime lastActionTime,
+		@NonNull OnlineStatus onlineStatus
 	) {}
 }
