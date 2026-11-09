@@ -89,7 +89,8 @@ export default class AuthService {
             this.csrfTokenObservable = this.http.get<{ csrf: string }>("/api/csrf").pipe(
                 single(),
                 map(({ csrf }) => csrf),
-                shareReplay(1)
+                shareReplay(1),
+                handleHttpError()
             );
         }
 

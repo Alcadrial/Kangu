@@ -20,12 +20,12 @@ export default class UserService {
 
     private readonly http = inject(HttpClient);
 
-    readonly _error = signal<string | null>(null);
+    private readonly _error = signal<string | null>(null);
     readonly error = this._error.asReadonly();
     readonly user = toSignal(this.http.get<UserData>("/api/user").pipe(
         handleHttpError(),
-        catchError((error: string) => {
-            this._error.set(error);
+        catchError((error: Error) => {
+            this._error.set(error.message);
             return of(null);
         })
     ));

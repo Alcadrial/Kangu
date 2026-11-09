@@ -2,7 +2,8 @@ import { TestBed } from "@angular/core/testing";
 import AuthService from "./auth.service";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { firstValueFrom } from "rxjs";
-import { authData, HTTP_ERRORS } from "../utils/test";
+import { authData, HTTP_ERRORS } from "~utils/test";
+import { translations } from "../translations";
 
 describe("auth service", () => {
     let service: AuthService;
@@ -33,7 +34,6 @@ describe("auth service", () => {
 
             assert.strictEqual(await promise, token.csrf);
         });
-
         it("cache token", async () => {
             const token = { csrf: "csrf" };
 
@@ -50,19 +50,15 @@ describe("auth service", () => {
 
             assert.strictEqual(await promise, token.csrf);
         });
-
-        it("fail", async () => {
-            let promise = firstValueFrom(service.getCsrfToken());
-
-            http.expectOne({
-                url: "/api/csrf",
-                method: "GET"
-            }).flush("fail", {
-                status: 500,
-                statusText: "Error"
-            });
-
-            await expect(promise).rejects.toThrow();
+        it.for(HTTP_ERRORS)("fail with status $status", async ({ status, error }) => {
+            const promise = firstValueFrom(service.getCsrfToken());
+            http.expectOne("/api/csrf").flush("fail", { status, statusText: error });
+            await expect(promise).rejects.toThrow(error);
+        });
+        it("fail with network error", async () => {
+            const promise = firstValueFrom(service.getCsrfToken());
+            http.expectOne("/api/csrf").error(new ProgressEvent("Error"));
+            await expect(promise).rejects.toThrow(translations.serverConnectionFail);
         });
     });
 
@@ -76,9 +72,9 @@ describe("auth service", () => {
 
             const promise = firstValueFrom(service.login(data.username, data.password, data.rememberMe));
 
-            http.expectOne(r => 
-                r.url == "/api/login" && 
-                r.method == "POST" && 
+            http.expectOne(r =>
+                r.url == "/api/login" &&
+                r.method == "POST" &&
                 r.body.username == data.username &&
                 r.body.password == data.password &&
                 Boolean(r.body.rememberMe) == data.rememberMe
@@ -107,8 +103,13 @@ describe("auth service", () => {
         });
         it.for(HTTP_ERRORS)("fail with status $status", async ({ status, error }) => {
             const promise = firstValueFrom(service.login("user", "password", false));
-            http.expectOne("/api/login").flush("fail", { status, statusText: "" });
+            http.expectOne("/api/login").flush("fail", { status, statusText: error });
             await expect(promise).rejects.toThrow(error);
+        });
+        it("fail with network error", async () => {
+            const promise = firstValueFrom(service.login("user", "password", false));
+            http.expectOne("/api/login").error(new ProgressEvent("Error"));
+            await expect(promise).rejects.toThrow(translations.serverConnectionFail);
         });
     });
 
@@ -157,8 +158,13 @@ describe("auth service", () => {
         });
         it.for(HTTP_ERRORS)("fail with status $status", async ({ status, error }) => {
             const promise = firstValueFrom(service.register("user", "g@g.g", "password", false));
-            http.expectOne("/api/register").flush("fail", { status, statusText: "" });
+            http.expectOne("/api/register").flush("fail", { status, statusText: error });
             await expect(promise).rejects.toThrow(error);
+        });
+        it("fail with network error", async () => {
+            const promise = firstValueFrom(service.register("user", "g@g.g", "password", false));
+            http.expectOne("/api/register").error(new ProgressEvent("Error"));
+            await expect(promise).rejects.toThrow(translations.serverConnectionFail);
         });
     });
 
@@ -175,8 +181,13 @@ describe("auth service", () => {
         });
         it.for(HTTP_ERRORS)("fail with status $status", async ({ status, error }) => {
             const promise = firstValueFrom(service.logout());
-            http.expectOne("/api/logout").flush("fail", { status, statusText: "" });
+            http.expectOne("/api/logout").flush("fail", { status, statusText: error });
             await expect(promise).rejects.toThrow(error);
+        });
+        it("fail with network error", async () => {
+            const promise = firstValueFrom(service.logout());
+            http.expectOne("/api/logout").error(new ProgressEvent("Error"));
+            await expect(promise).rejects.toThrow(translations.serverConnectionFail);
         });
     });
 
@@ -248,10 +259,15 @@ describe("auth service", () => {
             http.expectOne("/api/auth").flush(authData);
             await expect(promise).resolves.equals(value);
         });
-        it.for(HTTP_ERRORS)("fail with status $status", async ({status, error}) => {
+        it.for(HTTP_ERRORS)("fail with status $status", async ({ status, error }) => {
             const promise = firstValueFrom(service.hasRole("USER"));
-            http.expectOne("/api/auth").flush("fail", { status, statusText: "" });
+            http.expectOne("/api/auth").flush("fail", { status, statusText: error });
             await expect(promise).rejects.toThrow(error);
+        });
+        it("fail with network error", async () => {
+            const promise = firstValueFrom(service.hasRole("USER"));
+            http.expectOne("/api/auth").error(new ProgressEvent("Error"));
+            await expect(promise).rejects.toThrow(translations.serverConnectionFail);
         });
     });
 });

@@ -77,7 +77,7 @@ export default class ChatService {
     }
 
     loadChats(): Observable<Details[]> {
-        return this.http.get<ChatsResponse>("/api/messages/chats");
+        return this.http.get<ChatsResponse>("/api/messages/chats").pipe(handleHttpError());
     }
 
     loadChatMessages(user: string): Observable<ChatDetailsAndMessages> {
@@ -95,12 +95,7 @@ export default class ChatService {
     }
 
     sendMessage(receiver: string, message: string): Observable<Message> {
-        return this.http.get<MessagesResponse>("/api/messages/send", {
-            params: {
-                receiver,
-                message
-            }
-        }).pipe(
+        return this.http.post<MessagesResponse>("/api/messages/send", { receiver, message }).pipe(
             map(r => {
                 const message = this.collectMessagesParts(r.messages)[0];
                 this.data?.messages?.push(message);
