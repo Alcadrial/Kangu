@@ -9,11 +9,11 @@ export const routes: Routes = [
         component: Chat
     },
     {
-        path: ":user",
+        path: USER_PATHS.settings,
         component: Chat
     },
     {
-        path: USER_PATHS.settings,
+        path: ":user",
         component: Chat
     },
 ]

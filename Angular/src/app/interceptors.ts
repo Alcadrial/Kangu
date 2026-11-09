@@ -4,8 +4,8 @@ import { inject } from "@angular/core";
 import { catchError, mergeMap, Observable } from "rxjs";
 import AuthService from "./services/auth.service";
 import { Router } from "@angular/router";
-import { AUTHENTICATION_URLS, USER_URLS } from "./constants/urls.constants";
-import AlertService from "./services/AlertService";
+import { AUTHENTICATION_URLS } from "./constants/urls.constants";
+import AlertService from "./services/alert.service";
 import { translations } from "./translations";
 import { headers } from "./app.constants";
 

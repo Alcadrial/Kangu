@@ -4,7 +4,9 @@ import { Component, computed, input } from "@angular/core";
     selector: "separator",
     imports: [],
     template: `
-        <div [class]="classValue()"></div>
+        <div class="flex justify-center items-center">
+            <div [class]="classValue()"></div>
+        </div>
     `
 })
 export default class Separator {

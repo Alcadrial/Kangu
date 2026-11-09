@@ -1,0 +1,52 @@
+<div class="size-full flex flex-col justify-center items-center">
+    @if (isLoadingMessages()) {
+        <app-spinner size="md"></app-spinner>
+    }
+    @else if (chat(); as chat) {
+        <div class="size-full flex items-center justify-center">
+            @if (chat.messages.length > 0) {
+                <div class="flex flex-col gap-2 divide-y">
+                    @for (message of chat.messages; track message.timestamp) {
+                        <div class="flex flex-row bg-neutral-400">
+                            <div class="w-10 grow">
+                                @for (part of message.parts; track $index) {
+                                    <span>{{part.message}}</span>
+                                }
+                            </div>
+                            <span>{{message.timestamp}}</span>
+                        </div>
+                    }
+                </div>
+            }
+            @else {
+                <span>No messages yet</span>
+            }
+        </div>
+        <div class="w-full h-16 flex flex-col">
+            <separator class="flex flex-col items-center" w="w-[90%]"/>
+            <div class="size-full p-4">
+                <form (submit)="onSubmit($event)" class="size-full flex flex-row">
+                    <div class="w-0 grow flex flex-row">
+                        <separator class="flex flex-row items-center pr-2" [isVertical]=true h="h-full" color="bg-neutral-700" />
+                        <input 
+                            class="rounded-none focus:outline-0" 
+                            type="text" 
+                            placeholder="Write your message"
+                            [formField]="messageForm" />
+                    </div>
+                    @if (messageDraft()) {
+                        <button
+                            type="submit"
+                            class="w-25 text-white border border-neutral-700 bg-neutral-800 enabled:cursor-pointer disabled:text-neutral-600 disabled:border-neutral-800 disabled:bg-neutral-900"
+                        >
+                            Send
+                        </button>
+                    }
+                </form>
+            </div>
+        </div>
+    }
+    @else {
+        <span>No open chat</span>
+    }
+</div>

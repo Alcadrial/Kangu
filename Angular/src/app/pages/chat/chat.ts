@@ -1,39 +1,49 @@
-import { Component, computed, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit, signal } from "@angular/core";
+import { Component, computed, effect, inject, input, signal } from "@angular/core";
 import { ChatList } from "../../components/chat/chatList";
-import { ChatContent } from "../../components/chat/chat";
+import { ChatMessages } from "../../components/chat/chatMessages";
 import { ActivatedRoute } from "@angular/router";
-import { toSignal } from "@angular/core/rxjs-interop";
-import { map, tap } from "rxjs";
-import AlertService from "~services/chat.service";
-import ChatService, { ChatDetailsAndMessages, Details } from "~services/ChatService";
-import "@awesome.me/webawesome/dist/components/spinner/spinner.js";
+import AlertService from "~services/alert.service";
+import ChatService, { ChatDetailsAndMessages, Details } from "~services/chat.service";
+import UserService from "~services/user.service";
 
 @Component({
     selector: "chat-root",
-    imports: [ChatList, ChatContent],
-    templateUrl: "./chat.html",
-    schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    imports: [ChatList, ChatMessages],
+	templateUrl: "./chat.html"
 })
-export class Chat implements OnInit {
-    private readonly activatedRoute = inject(ActivatedRoute);
+export class Chat {
+    private readonly route = inject(ActivatedRoute);
     private readonly alertService = inject(AlertService);
     private readonly chatService = inject(ChatService);
+    private readonly userService = inject(UserService);
 
-    readonly otherUser = toSignal(this.activatedRoute.paramMap.pipe(
-        map(p => p.get("userId")),
-        tap(user => this.otherUser && this.otherUser() != user && this.resetDraft())
-    ), { initialValue: null });
+    readonly user = input<string>();
+
+    readonly sender = computed(() => this.userService.user()?.username);
+    readonly receiver = computed(() => this.user());
+/*
+    private readonly currentPath = toSignal(this.router.events.pipe(
+        filter((event) => event instanceof NavigationEnd),
+        map((event: NavigationEnd) => new URL(event.urlAfterRedirects))
+    ));*/
+
+    readonly currentChat = signal<ChatDetailsAndMessages | null>(null);
+    readonly isLoadingMessages = computed<boolean>(() => !!this.currentChat());
 
     readonly chats = signal<Details[] | null>(null);
     readonly isLoadingChats = computed<boolean>(() => !!this.chats());
-    readonly chat = signal<ChatDetailsAndMessages | null>(null);
-    readonly isLoadingMessages = computed<boolean>(() => !!this.chat());
+
     readonly messageDraft = signal<string>("");
     readonly isSendingMessage = signal<boolean>(false);
 
-    ngOnInit(): void {
-        this.loadChats();
-        this.loadChatMessages();
+    constructor() {
+        effect(() => {
+            if (this.sender()) {
+                this.resetDraft();
+                this.loadChats();
+                this.loadChatMessages();
+            }
+        });
     }
 
     resetDraft() {
@@ -53,28 +63,28 @@ export class Chat implements OnInit {
     }
 
     loadChatMessages() {
-        const otherUser = this.otherUser();
-        if (!otherUser) return;
-        this.chat.set(null);
-        this.chatService.loadChatMessages(otherUser).subscribe({
+        const receiver = this.receiver();
+        if (!receiver) return;
+        this.currentChat.set(null);
+        this.chatService.loadChatMessages(receiver).subscribe({
             next: chat => {
-                this.chat.set(chat);
+                this.currentChat.set(chat);
             },
             error: e => {
                 this.alertService.notifyError(e as string);
             }
         })
     }
-
+    
     sendMessage(message: string): boolean {
-        const otherUser = this.otherUser();
-        if (!otherUser) return false;
-        const oldChat = this.chat();
+        const userId = this.receiver();
+        if (!userId) return false;
+        const oldChat = this.currentChat();
         if (!oldChat) return false;
 
-        this.chatService.sendMessage(otherUser, message).subscribe({
+        this.chatService.sendMessage(userId, message).subscribe({
             next: newMessage => {
-                this.chat.set({
+                this.currentChat.set({
                     messages: [...oldChat.messages, newMessage],
                     details: oldChat.details
                 });
@@ -85,5 +95,4 @@ export class Chat implements OnInit {
         });
         return true;
     }
-
 }

@@ -1,6 +1,7 @@
 import { inject, Injectable } from "@angular/core";
 import { EMPTY, map, Observable } from "rxjs";
 import { HttpClient } from "@angular/common/http";
+import { handleHttpError } from "~utils/errors";
 
 type RawMessage = {
     sender: string;
@@ -29,6 +30,10 @@ export type Message = {
 }
 
 export type Details = {
+    username: string;
+    lastMessage: string;
+    lastMessageMimeType: string;
+    messageTimestamp: Date;
     receiveTimestampOther: Date;
     readTimestampSelf: Date;
     readTimestampOther: Date;
@@ -84,7 +89,8 @@ export default class ChatService {
             map(r => this.data = {
                 messages: this.collectMessagesParts(r.messages),
                 details: r.details
-            })
+            }),
+            handleHttpError()
         );
     }
 
@@ -99,7 +105,8 @@ export default class ChatService {
                 const message = this.collectMessagesParts(r.messages)[0];
                 this.data?.messages?.push(message);
                 return message;
-            })
+            }),
+            handleHttpError()
         );
     }
 

@@ -1,27 +1,12 @@
 
 <div class="size-full flex flex-row">
-    <chat-list class="h-full w-max-60 w-min-20 w-[30%]"/>
-    <div class="size-full">
-
-        @if (otherUser != null) {
-            <div class="size-full flex justify-center items-center">
-                <span>No open chat</span>
-            </div> 
-        }
-        @else if (chat(); as chat) {
-            <chat-content
-                class="size-full"
-                [chat]="chat"
-                [messageDraft]="messageDraft()"
-                [isLoadingMessages]="isLoadingMessages()"
-                [isSendingMessage]="isSendingMessage()"
-                (sendMessage)="sendMessage($event)"
-            />
-        }
-        @else {
-            <div class="size-full flex justify-center items-center">
-                <wa-spinner style="font-size: 70px; --track-width: 5px;"></wa-spinner>
-            </div>
-        }
-    </div>
+    <chat-list [chats]="chats()" class="h-full w-max-60 w-min-20 w-[30%]"/>
+    <chat-messages
+        class="size-full"
+        [chat]="currentChat()"
+        [messageDraft]="messageDraft()"
+        [isLoadingMessages]="isLoadingMessages()"
+        [isSendingMessage]="isSendingMessage()"
+        (sendMessage)="sendMessage($event)"
+    />
 </div>

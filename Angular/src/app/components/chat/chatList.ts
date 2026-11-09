@@ -1,15 +1,15 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, signal } from "@angular/core";
-import { ChatListItem, ChatPreviewData } from "./chatListItem";
-import "@awesome.me/webawesome/dist/components/button/button.js";
-import "@awesome.me/webawesome/dist/components/dialog/dialog.js";
-import "@awesome.me/webawesome/dist/components/input/input.js";
-import { form } from "@angular/forms/signals";
-import { setValue } from "./common";
+import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, input, signal } from "@angular/core";
+import { ChatListItem } from "./chatListItem";
+import { form, FormField, required } from "@angular/forms/signals";
 import { Router } from "@angular/router";
+import { Details } from "~services/chat.service";
+import { TextInputComponent } from "~components/input";
+import DialogComponent from "~components/dialog";
+import SpinnerComponent from "~components/spinner";
 
 @Component({
     selector: "chat-list",
-    imports: [ChatListItem],
+    imports: [ChatListItem, TextInputComponent, DialogComponent, SpinnerComponent, FormField],
     templateUrl: "./chatList.html",
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
@@ -17,33 +17,29 @@ export class ChatList {
 
     private readonly router = inject(Router);
 
-    readonly users = signal<ChatPreviewData[]>([]);
+    readonly chats = input.required<Details[] | null>();
     readonly isCreateConversationModalOpen = signal<boolean>(false);
 
-    readonly newChatUsername = signal({
-        username: ""
+    readonly newChatUsername = signal<string>("");
+
+    newChatForm = form(this.newChatUsername, username => {
+        required(username);
     });
 
-    newChatForm = form(this.newChatUsername);
-
     openChat(username: string) {
-        console.log("OPENING " + username)
         this.router.navigate(["/chat", username]);
-    }
-
-    openCreateConversationModal() {
-        this.isCreateConversationModalOpen.set(true);
-    }
-
-    closeCreateConversationModal() {
         this.isCreateConversationModalOpen.set(false);
+        this.newChatUsername.set("");
+    }
+
+    onCloseDialog() {
+        this.newChatUsername.set("");
     }
 
     createNewConversation(e: Event) {
         e.preventDefault();
-    }
+        if (this.newChatForm().invalid()) return;
 
-    setUsername(e: Event) {
-        setValue(this.newChatUsername, e);
+        this.openChat(this.newChatUsername());
     }
 }

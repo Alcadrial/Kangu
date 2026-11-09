@@ -1,22 +1,37 @@
 <div class="size-full border-r border-neutral-700">
-    <div class="w-full p-2 flex flex-col divide-y overflow-y-auto">
-        @for (user of users(); track user.username) {
-            <chat-list-item [user]="user" class="border-neutral-700 cursor-pointer" (click)="openChat(user.username)" />
-        }
-        <wa-button appearance="plain" (click)="openCreateConversationModal()">
-            <span>New conversation</span>
-        </wa-button>
+    @if (chats(); as chats) {
+        <div class="w-full p-2 flex flex-col divide-y overflow-y-auto">
+            @for (chat of chats; track chat.username) {
+                <chat-list-item [chatPreview]="chat" class="border-neutral-700 cursor-pointer" (click)="openChat(chat.username)" />
+            }
+            <wa-button appearance="plain" (click)="isCreateConversationModalOpen.set(true)">
+                <span>New conversation</span>
+            </wa-button>
 
-        <wa-dialog label="Start a new conversation" [open]="isCreateConversationModalOpen()" (wa-after-hide)="closeCreateConversationModal()">
-            <form (submit)="createNewConversation($event)">
-                <wa-input 
-                    label="User"
-                    [value]="newChatForm.username"
-                    (input)="setUsername($event)"
-                ></wa-input>
-                akka {{newChatUsername().username}}
-                <wa-button [disabled]="!newChatForm().value().username">Start chatting</wa-button>
-            </form>
-        </wa-dialog>
-    </div>
+            <app-dialog
+                title="Start a new conversation" 
+                [(open)]="isCreateConversationModalOpen"
+                (openChange)="!$event && onCloseDialog()"
+            >
+                <form class="w-full flex flex-col items-end gap-1" (submit)="createNewConversation($event)">
+                    <app-input 
+                        class="w-full"
+                        label="User"
+                        placeholder="username"
+                        [autofocus]="true"
+                        [formField]="newChatForm"
+                    ></app-input>
+                    <wa-button
+                        type="submit"
+                        [disabled]="!newChatForm().value()"
+                    >
+                        Start chatting
+                    </wa-button>
+                </form>
+            </app-dialog>
+        </div>
+    }
+    @else {
+        <app-spinner size="md"></app-spinner>
+    }
 </div>
