@@ -45,14 +45,11 @@ export function errorInterceptor(
 
     return next(request).pipe(catchError((error: HttpErrorResponse) => {
         const status = error.status;
-        if (status == 502) throw new Error(translations.serverConnectionFail);
-        if (status / 100 == 5) throw new Error(translations.internalServerError);
         if (status == 403) {
             authService.logout();
             alertService.notifyError(translations.unknownError);
             router.navigate([AUTHENTICATION_URLS.login]);
         }
-
-        throw error.error.message;
+        throw error;
     }));
 }

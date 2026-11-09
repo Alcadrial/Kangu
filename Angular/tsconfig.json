@@ -16,6 +16,7 @@
     "module": "preserve",
     "paths": {
       "~components/*": ["./src/app/components/*"],
+      "~directives/*": ["./src/app/directives/*"],
       "~constants/*": ["./src/app/core/*"],
       "~services/*": ["./src/app/services/*"],
       "~pages/*": ["./src/app/pages/*"],

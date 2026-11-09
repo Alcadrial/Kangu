@@ -1,13 +1,25 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <title>Kangu</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="utf-8">
+    <title>Kangu</title>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script>
+        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", e => {
+            document.documentElement.classList.toggle("dark", e.matches);
+			document.documentElement.classList.toggle("wa-dark", e.matches);
+        });
+		const preferDark = localStorage.theme === "dark" || (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.classList.toggle("dark", preferDark);
+		document.documentElement.classList.toggle("wa-dark", preferDark);
+    </script>
 </head>
-<body class="wa-theme-awesome wa-brand-yellow wa-dark">
-  <app-root></app-root>
+
+<body class="wa-theme-awesome wa-brand-yellow bg-surface-50 dark:bg-surface-950 text-surface-950 dark:text-surface-50">
+    <app-root></app-root>
 </body>
+
 </html>

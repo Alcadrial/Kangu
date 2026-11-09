@@ -2,19 +2,35 @@
 
 @use "tailwindcss";
 
-@media (prefers-color-scheme: dark) {
-    html {
-        background-color: black;
-        color: white;
-    }
-    p, span, h1, h2, h3, h4, h5, h6 {
-    }
-}
-@media (prefers-color-scheme: light) {
-    html {
-        background-color: white;
-        color: black;
-    }
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --color-primary-50:  oklch(98.7% 0.022 95.277);
+    --color-primary-100: oklch(96.2% 0.059 95.617);
+    --color-primary-200: oklch(92.4% 0.12 95.746);
+    --color-primary-300: oklch(87.9% 0.169 91.605);
+    --color-primary-400: oklch(82.8% 0.189 84.429);
+    --color-primary-500: oklch(76.9% 0.188 70.08);
+    --color-primary-600: oklch(66.6% 0.179 58.318);
+    --color-primary-700: oklch(55.5% 0.163 48.998);
+    --color-primary-800: oklch(47.3% 0.137 46.201);
+    --color-primary-900: oklch(41.4% 0.112 45.904);
+    --color-primary-950: oklch(27.9% 0.077 45.635);
+    --color-surface-50: #F2F2F2;
+    --color-surface-100: #E5E5E5;
+    --color-surface-200: #CCCCCC;
+    --color-surface-300: #B2B2B2;
+    --color-surface-400: #999999;
+    --color-surface-500: #7F7F7F;
+    --color-surface-600: #4C4C4C;
+    --color-surface-700: #303030;
+    --color-surface-800: #1D1D1D;
+    --color-surface-900: #151515;
+    --color-surface-950: #0C0C0C;
+    --color-success-weak: #00BA1B;
+    --color-success-strong: #00D819;
+    --color-error-weak: #F70804;
+    --color-error-strong: #C90404;
 }
 
 main {
@@ -29,34 +45,51 @@ main {
     }
 }
 
-:where(:root) {
-    --wa-color-gray-95: #f1f1f1;
-    --wa-color-gray-90: #e4e4e4;
-    --wa-color-gray-80: #c7c7c7;
-    --wa-color-gray-70: #ababab;
-    --wa-color-gray-60: #919191;
-    --wa-color-gray-50: #717171;
-    --wa-color-gray-40: #545454;
-    --wa-color-gray-30: #424242;
-    --wa-color-gray-20: #2f2f2f;
-    --wa-color-gray-10: #1b1b1b;
-    --wa-color-gray-05: #101010;
+button {
+    border-width: 2px;
+    &.primary {
+        background-color: var(--color-primary-600);
+        border-color: var(--color-primary-700);
+        &:disabled {
+            background-color: var(--color-primary-800);
+            border-color: var(--color-primary-950);
+            color: var(--color-surface-300);
+        }
+    }
+    &.secondary {
+        background-color: var(--color-primary-800);
+        border-color: var(--color-primary-900);
+        &:disabled {
+            background-color: var(--color-primary-900);
+            border-color: var(--color-primary-950);
+            color: var(--color-surface-600);
+        }
+    }
+    &.plain {
+        background-color: var(--color-surface-600);
+        border-color: var(--color-surface-700);
+    }
+    &.success {
+        background-color: var(--color-success-strong);
+        border-color: var(--color-success-weak);
+    }
+    &.destructive {
+        background-color: var(--color-error-strong);
+        border-color: var(--color-error-weak);
+    }
 }
 
-:where(:root),
-.wa-light,
-.wa-dark,
-.wa-invert {
-    /**/
+input {
+    outline: 0px;
+    &.inline {
+        margin: 8px 0px;
+    }
 }
 
-:where(:root),
-.wa-light,
-.wa-dark .wa-invert {
-    /* your styles here */
-}
-
-.wa-dark,
-.wa-invert {
-    /* your styles here */
+.wa-error-message {
+    display: block;
+    margin-block: 0.25rem 0;
+    color: var(--wa-color-danger-600, #b42318);
+    font-size: 0.875rem;
+    line-height: 1.25;
 }
