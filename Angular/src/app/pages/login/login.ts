@@ -1,7 +1,7 @@
 import { Component, inject, signal } from "@angular/core";
 import { form, submit, FormField, required } from "@angular/forms/signals";
 import { Router, RouterLink } from "@angular/router";
-import AuthService from "../../services/AuthService";
+import AuthService from "~services/auth.service";
 
 interface LoginData {
     username: string;

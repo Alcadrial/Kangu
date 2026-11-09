@@ -4,7 +4,7 @@ import { ChatContent } from "../../components/chat/chat";
 import { ActivatedRoute } from "@angular/router";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { map, tap } from "rxjs";
-import AlertService from "~services/AlertService";
+import AlertService from "~services/chat.service";
 import ChatService, { ChatDetailsAndMessages, Details } from "~services/ChatService";
 import "@awesome.me/webawesome/dist/components/spinner/spinner.js";
 

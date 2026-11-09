@@ -1,14 +1,13 @@
 import { PlatformLocation } from "@angular/common";
-import { HttpErrorResponse, HttpEvent, HttpEventType, HttpHandlerFn, HttpRequest, HttpResponse } from "@angular/common/http";
+import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpRequest } from "@angular/common/http";
 import { inject } from "@angular/core";
-import { catchError, mergeMap, Observable, tap } from "rxjs";
-import AuthService, { AuthData } from "./services/AuthService";
+import { catchError, mergeMap, Observable } from "rxjs";
+import AuthService from "./services/auth.service";
 import { Router } from "@angular/router";
 import { AUTHENTICATION_URLS, USER_URLS } from "./constants/urls.constants";
 import AlertService from "./services/AlertService";
 import { translations } from "./translations";
 import { headers } from "./app.constants";
-import UserService from "./services/UserService";
 
 export function xsrfInterceptor(
     req: HttpRequest<unknown>,

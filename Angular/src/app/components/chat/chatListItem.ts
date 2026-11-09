@@ -1,5 +1,5 @@
 import { Component, inject, input } from "@angular/core";
-import AuthService from "~services/AuthService";
+import AuthService from "~services/auth.service";
 
 export type ChatPreviewData = {
     username: string;

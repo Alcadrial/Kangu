@@ -1,7 +1,8 @@
-import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
-import { catchError, map, Observable, of, shareReplay, single, tap } from "rxjs";
+import { map, Observable, of, shareReplay, single, tap } from "rxjs";
 import { AUTHENTICATION_URLS } from "../constants/urls.constants";
+import { handleHttpError } from "~utils/errors";
 
 export type AuthData = {
     principal: string;
@@ -60,9 +61,7 @@ export default class AuthService {
                 //TODO: rememberMe
                 this.userDataObservable = of(r).pipe(shareReplay(1));
             }),
-            catchError((error: HttpErrorResponse) => {
-                throw error.error.message;
-            })
+            handleHttpError()
         );
     }
 
@@ -71,9 +70,7 @@ export default class AuthService {
             tap(() => {
                 this.userDataObservable = null;
             }),
-            catchError((error: HttpErrorResponse) => {
-                throw error.error.message;
-            })
+            handleHttpError()
         );
     }
 
@@ -83,9 +80,7 @@ export default class AuthService {
                 //TODO: rememberMe
                 this.userDataObservable = of(r).pipe(shareReplay(1));
             }),
-            catchError((error: HttpErrorResponse) => {
-                throw error.error.message;
-            })
+            handleHttpError()
         );
     }
 
@@ -105,7 +100,8 @@ export default class AuthService {
         if (!this.userDataObservable) {
             this.userDataObservable = this.http.get<AuthData>("/api/auth").pipe(
                 single(),
-                shareReplay(1)
+                shareReplay(1),
+                handleHttpError()
             );
         }
         const auth = "ROLE_" + role.toUpperCase();
@@ -114,11 +110,8 @@ export default class AuthService {
         );
     }
 
-    isAuthenticated() {
-        return false//!!this.userData();
-    }
-
     getUserData() {
-        return this.userDataObservable!;
+        if (!this.userDataObservable) throw Error("Missing previous request for data");
+        return this.userDataObservable;
     }
 }

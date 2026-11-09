@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from "@angular/core";
-import { email, form, submit, FormField, maxLength, minLength, required, pattern } from "@angular/forms/signals";
+import { form, submit, FormField, maxLength, minLength, required, pattern } from "@angular/forms/signals";
 import { Router, RouterLink } from "@angular/router";
-import AuthService from "~services/AuthService";
+import AuthService from "~services/auth.service";
 import { countRegex } from "~utils/strings";
 
 interface FormData {
