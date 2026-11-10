@@ -1,8 +1,6 @@
 package com.alcadrial.kangu.api;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.Instant;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
@@ -33,14 +31,14 @@ public class MessagesController {
 	@PostMapping("/send")
 	ResponseEntity<MessageEntity[]> postSend(@AuthenticationPrincipal User user, @RequestBody MessageData body) throws Exception
 	{
-		MessageEntity[] message = messagesService.sendMessage(user.getUsername(), body.receiver(), body.message(), LocalDateTime.now(ZoneId.ofOffset("UTC", ZoneOffset.ofHours(0))));
+		MessageEntity[] message = messagesService.sendMessage(user.getUsername(), body.receiver(), body.message(), Instant.now());
 		return ResponseEntity.ok(message);
 	}
 	
 	record MessageData(String receiver, String message) {}
 	
 	@GetMapping("/get")
-	ResponseEntity<ChatDetailsAndMessages> getMessages(@AuthenticationPrincipal User user, @RequestParam("user") String otherUsername, @RequestParam(value = "before", required = false) @Nullable LocalDateTime before, @RequestParam(value = "part", defaultValue = "0") int part)
+	ResponseEntity<ChatDetailsAndMessages> getMessages(@AuthenticationPrincipal User user, @RequestParam("user") String otherUsername, @RequestParam(value = "before", required = false) @Nullable Instant before, @RequestParam(value = "part", defaultValue = "0") int part)
 	{
 		ChatDetailsAndMessages messages = messagesService.readChatDetailsAndMessagesByArrivalTimestamp(user.getUsername(), otherUsername, before, part);
 		return ResponseEntity.ok(messages);

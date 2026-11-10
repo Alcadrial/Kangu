@@ -2,7 +2,7 @@ package com.alcadrial.kangu.unit.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +15,6 @@ import com.alcadrial.kangu.TestConstants;
 import com.alcadrial.kangu.data.MessageEntity;
 import com.alcadrial.kangu.data.UserEntity;
 import com.alcadrial.kangu.repository.MessagesRepository;
-import com.alcadrial.kangu.repository.MessagesRepository.Message;
 
 import jakarta.persistence.EntityManager;
 
@@ -39,30 +38,30 @@ class MessagesRepositoryTest {
 	static final String MESSAGE7 = TestConstants.MESSAGE7;
 	static final String MESSAGE8 = TestConstants.MESSAGE8;
 	
-	static final LocalDateTime T_0 = TestConstants.TIME_0;
-	static final LocalDateTime T_1 = TestConstants.TIME_1;
-	static final LocalDateTime T_2 = TestConstants.TIME_2;
-	static final LocalDateTime T_3 = TestConstants.TIME_3;
-	static final LocalDateTime T_4 = TestConstants.TIME_4;
-	static final LocalDateTime T_5 = TestConstants.TIME_5;
-	static final LocalDateTime T_6 = TestConstants.TIME_6;
-	static final LocalDateTime T_7 = TestConstants.TIME_7;
-	static final LocalDateTime T_8 = TestConstants.TIME_8;
-	static final LocalDateTime T_LAST = TestConstants.TIME_LAST;
+	static final Instant T_0 = TestConstants.TIME_0;
+	static final Instant T_1 = TestConstants.TIME_1;
+	static final Instant T_2 = TestConstants.TIME_2;
+	static final Instant T_3 = TestConstants.TIME_3;
+	static final Instant T_4 = TestConstants.TIME_4;
+	static final Instant T_5 = TestConstants.TIME_5;
+	static final Instant T_6 = TestConstants.TIME_6;
+	static final Instant T_7 = TestConstants.TIME_7;
+	static final Instant T_8 = TestConstants.TIME_8;
+	static final Instant T_LAST = TestConstants.TIME_LAST;
 	
 	@Autowired
 	private MessagesRepository messagesRepository;
 	@Autowired
 	private EntityManager entityManager;
 	
-	private MessageEntity messageOf(String sender, String receiver, String message, LocalDateTime time, int part)
+	private MessageEntity messageOf(String sender, String receiver, String message, Instant time, int part)
 	{
 		return new MessageEntity(sender, receiver, message, MediaType.TEXT_PLAIN_VALUE, time, part);
 	}
 	
-	private void assertMessages(List<String> expected, List<Message> found)
+	private void assertMessages(List<String> expected, List<MessageEntity> found)
 	{
-		assertEquals(expected, found.stream().map(Message::message).toList());
+		assertEquals(expected, found.stream().map(MessageEntity::getMessage).toList());
 	}
 	
 	@BeforeEach

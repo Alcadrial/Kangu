@@ -1,8 +1,10 @@
 package com.alcadrial.kangu.data;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import org.jspecify.annotations.NonNull;
+
+import com.alcadrial.kangu.utils.Constants;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,11 +29,11 @@ public class UserEntity {
 	@Column
 	private boolean enabled;
 	@Column
-	private @NonNull LocalDateTime registrationTime;
+	private @NonNull Instant registrationTime;
 	@Column
-	private @NonNull LocalDateTime lastAccessTime;
+	private @NonNull Instant lastAccessTime;
 	@Column
-	private @NonNull LocalDateTime lastActionTime;
+	private @NonNull Instant lastActionTime;
 	@Column
 	@Enumerated
 	private @NonNull OnlineStatus onlineStatus;
@@ -43,15 +45,15 @@ public class UserEntity {
 	
 	public UserEntity(String username, String password, String email)
 	{
-		this(username, password, email, true, LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), OnlineStatus.ON);
+		this(username, password, email, true, Constants.TIME_NEVER, Constants.TIME_NEVER, Constants.TIME_NEVER, OnlineStatus.ON);
 	}
 	
 	public static record Safe(
 		@NonNull String username,
 		@NonNull String email,
-		@NonNull LocalDateTime registrationTime,
-		@NonNull LocalDateTime lastAccessTime,
-		@NonNull LocalDateTime lastActionTime,
+		@NonNull Instant registrationTime,
+		@NonNull Instant lastAccessTime,
+		@NonNull Instant lastActionTime,
 		@NonNull OnlineStatus onlineStatus
 	) {}
 }

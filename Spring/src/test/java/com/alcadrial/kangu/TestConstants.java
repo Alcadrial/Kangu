@@ -1,6 +1,6 @@
 package com.alcadrial.kangu;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -50,17 +50,17 @@ public class TestConstants {
 	public static final String[][] CREDENTIALS_01 = crossProduct(USERNAMES_01, PASSWORDS_01);
 	public static final String[][] CREDENTIALS_ALL = crossProduct(ALL_USERNAMES, ALL_PASSWORDS);
 	
-	public static final LocalDateTime TIME_0 = LocalDateTime.of(2026, 1, 1, 0, 0);
-	public static final LocalDateTime TIME_1 = LocalDateTime.of(2026, 1, 1, 1, 0);
-	public static final LocalDateTime TIME_2 = LocalDateTime.of(2026, 1, 1, 2, 0);
-	public static final LocalDateTime TIME_3 = LocalDateTime.of(2026, 1, 1, 3, 0);
-	public static final LocalDateTime TIME_4 = LocalDateTime.of(2026, 1, 1, 4, 0);
-	public static final LocalDateTime TIME_5 = LocalDateTime.of(2026, 1, 1, 5, 0);
-	public static final LocalDateTime TIME_6 = LocalDateTime.of(2026, 1, 1, 6, 0);
-	public static final LocalDateTime TIME_7 = LocalDateTime.of(2026, 1, 1, 7, 0);
-	public static final LocalDateTime TIME_8 = LocalDateTime.of(2026, 1, 1, 8, 0);
-	public static final LocalDateTime TIME_9 = LocalDateTime.of(2026, 1, 1, 9, 0);
-	public static final LocalDateTime TIME_LAST = LocalDateTime.now();
+	public static final Instant TIME_0 = Instant.parse("2026-01-01T00:00:00Z");
+	public static final Instant TIME_1 = Instant.parse("2026-01-01T01:00:00Z");
+	public static final Instant TIME_2 = Instant.parse("2026-01-01T02:00:00Z");
+	public static final Instant TIME_3 = Instant.parse("2026-01-01T03:00:00Z");
+	public static final Instant TIME_4 = Instant.parse("2026-01-01T04:00:00Z");
+	public static final Instant TIME_5 = Instant.parse("2026-01-01T05:00:00Z");
+	public static final Instant TIME_6 = Instant.parse("2026-01-01T06:00:00Z");
+	public static final Instant TIME_7 = Instant.parse("2026-01-01T07:00:00Z");
+	public static final Instant TIME_8 = Instant.parse("2026-01-01T08:00:00Z");
+	public static final Instant TIME_9 = Instant.parse("2026-01-01T09:00:00Z");
+	public static final Instant TIME_LAST = Instant.now();
 	
 	/** <pre>username,password</pre> */
 	public static class Credentials01 implements ArgumentsProvider {

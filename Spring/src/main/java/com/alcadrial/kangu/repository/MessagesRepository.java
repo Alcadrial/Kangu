@@ -1,6 +1,6 @@
 package com.alcadrial.kangu.repository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
@@ -9,23 +9,6 @@ import org.springframework.data.repository.CrudRepository;
 import com.alcadrial.kangu.data.MessageEntity;
 
 public interface MessagesRepository extends CrudRepository<MessageEntity, MessageEntity.PrimaryKey> {
-	
-	/**
-	 * @param sender The user that sent this message
-	 * @param receiver The user that receive this message
-	 * @param message The raw message, may not be the full message
-	 * @param mimeType The mime type of this message
-	 * @param sendTimestamp The timestamp at which this message was received by the server
-	 * @param partIndex An positive integer used to compose a message split into multiple parts to allow multiple mime types in the same message
-	 */
-	public record Message(
-		String sender,
-		String receiver,
-		String message,
-		String messageMimeType,
-		LocalDateTime sendTimestamp,
-		int partIndex
-	) {}
 	
 	@Query(nativeQuery = true, value = """
 		SELECT sender, receiver, message, message_mime_type, send_timestamp, part_index
@@ -39,7 +22,7 @@ public interface MessagesRepository extends CrudRepository<MessageEntity, Messag
 			ORDER BY send_timestamp DESC, part_index DESC
 			FETCH FIRST ?5 ROWS ONLY
 		""")
-	List<Message> findMessagesSentBeforeTimeAndPart(String sender, String receiver, LocalDateTime lastReadTime, int lastReadPart, int limit);
+	List<MessageEntity> findMessagesSentBeforeTimeAndPart(String sender, String receiver, Instant lastReadTime, int lastReadPart, int limit);
 	
 	@Query(nativeQuery = true, value = """
 		SELECT sender, receiver, message, message_mime_type, send_timestamp, part_index
@@ -54,7 +37,7 @@ public interface MessagesRepository extends CrudRepository<MessageEntity, Messag
 			ORDER BY send_timestamp DESC, part_index DESC
 			FETCH FIRST ?5 ROWS ONLY
 		""")
-	List<Message> findMessagesSentOrReceivedBeforeTimeAndPart(String sender, String receiver, LocalDateTime lastReadTime, int lastReadPart, int limit);
+	List<MessageEntity> findMessagesSentOrReceivedBeforeTimeAndPart(String sender, String receiver, Instant lastReadTime, int lastReadPart, int limit);
 	
 	@Query(nativeQuery = true, value = """
 		SELECT sender, receiver, message, message_mime_type, send_timestamp, part_index
@@ -68,7 +51,7 @@ public interface MessagesRepository extends CrudRepository<MessageEntity, Messag
 			ORDER BY send_timestamp DESC, part_index DESC
 			FETCH FIRST ?4 ROWS ONLY
 		""")
-	List<Message> findMessagesSelfSentBeforeTimeAndPart(String username, LocalDateTime lastReadTime, int lastReadPart, int limit);
+	List<MessageEntity> findMessagesSelfSentBeforeTimeAndPart(String username, Instant lastReadTime, int lastReadPart, int limit);
 	
 	@Query(nativeQuery = true, value = """
 		SELECT sender, receiver, message, message_mime_type, send_timestamp, part_index
@@ -78,7 +61,7 @@ public interface MessagesRepository extends CrudRepository<MessageEntity, Messag
 			ORDER BY send_timestamp DESC, part_index DESC
 			FETCH FIRST ?3 ROWS ONLY
 		""")
-	List<Message> findMessagesSent(String sender, String receiver, int limit);
+	List<MessageEntity> findMessagesSent(String sender, String receiver, int limit);
 	
 	@Query(nativeQuery = true, value = """
 		SELECT sender, receiver, message, message_mime_type, send_timestamp, part_index
@@ -89,7 +72,7 @@ public interface MessagesRepository extends CrudRepository<MessageEntity, Messag
 			ORDER BY send_timestamp DESC, part_index DESC
 			FETCH FIRST ?3 ROWS ONLY
 		""")
-	List<Message> findMessagesSentOrReceived(String sender, String receiver, int limit);
+	List<MessageEntity> findMessagesSentOrReceived(String sender, String receiver, int limit);
 	
 	@Query(nativeQuery = true, value = """
 		SELECT sender, receiver, message, message_mime_type, send_timestamp, part_index
@@ -99,5 +82,5 @@ public interface MessagesRepository extends CrudRepository<MessageEntity, Messag
 			ORDER BY send_timestamp DESC, part_index DESC
 			FETCH FIRST ?2 ROWS ONLY
 		""")
-	List<Message> findMessagesSelfSent(String username, int limit);
+	List<MessageEntity> findMessagesSelfSent(String username, int limit);
 }

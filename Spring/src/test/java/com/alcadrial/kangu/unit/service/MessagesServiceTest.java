@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,7 +31,6 @@ import com.alcadrial.kangu.repository.MessagesReadCursorsRepository;
 import com.alcadrial.kangu.repository.MessagesReadCursorsRepository.ChatPreviewData;
 import com.alcadrial.kangu.repository.MessagesReadCursorsRepository.MessageReadCursorData;
 import com.alcadrial.kangu.repository.MessagesRepository;
-import com.alcadrial.kangu.repository.MessagesRepository.Message;
 import com.alcadrial.kangu.repository.UserRepository;
 import com.alcadrial.kangu.service.MessagesService;
 import com.alcadrial.kangu.service.MessagesService.ChatDetailsAndMessages;
@@ -45,11 +44,11 @@ class MessagesServiceTest {
 	static final String MESSAGE = TestConstants.MESSAGE;
 	static final String MIME = MediaType.TEXT_PLAIN_VALUE;
 	
-	static final LocalDateTime T_0 = TestConstants.TIME_0;
-	static final LocalDateTime T_1 = TestConstants.TIME_1;
-	static final LocalDateTime T_2 = TestConstants.TIME_2;
-	static final LocalDateTime T_3 = TestConstants.TIME_3;
-	static final LocalDateTime T_4 = TestConstants.TIME_4;
+	static final Instant T_0 = TestConstants.TIME_0;
+	static final Instant T_1 = TestConstants.TIME_1;
+	static final Instant T_2 = TestConstants.TIME_2;
+	static final Instant T_3 = TestConstants.TIME_3;
+	static final Instant T_4 = TestConstants.TIME_4;
 	
 	@Mock
 	private UserRepository userRepository;
@@ -66,12 +65,12 @@ class MessagesServiceTest {
 	
 	private ChatPreviewData chatPreviewDataOf(String sender, String message)
 	{
-		return new ChatPreviewData(sender, message, "", LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), false, false);
+		return new ChatPreviewData(sender, message, "", Instant.now(), Instant.now(), Instant.now(), Instant.now(), false, false);
 	}
 	
-	private ChatPreviewData chatPreviewDataOf(String sender, String message, LocalDateTime time)
+	private ChatPreviewData chatPreviewDataOf(String sender, String message, Instant time)
 	{
-		return new ChatPreviewData(sender, message, "", time, LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), false, false);
+		return new ChatPreviewData(sender, message, "", time, Instant.now(), Instant.now(), Instant.now(), false, false);
 	}
 	
 	@Test
@@ -128,7 +127,7 @@ class MessagesServiceTest {
 		when(messagesProperties.getMaxMessageSize()).thenReturn(100);
 		
 		assertThrows(MessageTooLongException.class, () -> {
-			messagesService.sendMessage(SENDER, RECEIVER, "a".repeat(101), LocalDateTime.now());
+			messagesService.sendMessage(SENDER, RECEIVER, "a".repeat(101), T_0);
 		});
 	}
 	
@@ -139,7 +138,7 @@ class MessagesServiceTest {
 		when(userRepository.existsById(RECEIVER)).thenReturn(false);
 		
 		assertThrows(UserNotFoundException.class, () -> {
-			messagesService.sendMessage(SENDER, RECEIVER, MESSAGE, LocalDateTime.now());
+			messagesService.sendMessage(SENDER, RECEIVER, MESSAGE, T_0);
 		});
 	}
 	
@@ -151,7 +150,7 @@ class MessagesServiceTest {
 		when(messagesReadCursorsRepository.isSenderBlocked(SENDER, RECEIVER)).thenReturn(Optional.of(true));
 		
 		assertThrows(BlockedException.class, () -> {
-			messagesService.sendMessage(SENDER, RECEIVER, MESSAGE, LocalDateTime.now());
+			messagesService.sendMessage(SENDER, RECEIVER, MESSAGE, T_0);
 		});
 	}
 	
@@ -183,10 +182,10 @@ class MessagesServiceTest {
 	void successReadMessageByArrivalTimestamp()
 	{
 		int limit = 10;
-		List<Message> message0 = List.of(new Message(SENDER, SENDER, MESSAGE, MIME, T_2, 0));
-		List<Message> message1 = List.of(new Message(SENDER, RECEIVER, MESSAGE, MIME, T_2, 0));
-		List<Message> message2 = List.of(new Message(SENDER, SENDER, MESSAGE, MIME, T_0, 0));
-		List<Message> message3 = List.of(new Message(SENDER, RECEIVER, MESSAGE, MIME, T_0, 0));
+		List<MessageEntity> message0 = List.of(new MessageEntity(SENDER, SENDER, MESSAGE, MIME, T_2, 0));
+		List<MessageEntity> message1 = List.of(new MessageEntity(SENDER, RECEIVER, MESSAGE, MIME, T_2, 0));
+		List<MessageEntity> message2 = List.of(new MessageEntity(SENDER, SENDER, MESSAGE, MIME, T_0, 0));
+		List<MessageEntity> message3 = List.of(new MessageEntity(SENDER, RECEIVER, MESSAGE, MIME, T_0, 0));
 		MessageReadCursorData cursor = new MessageReadCursorData(T_0, T_1, T_2, false, false);
 		
 		when(messagesProperties.getMaxBulkMessagesCount()).thenReturn(limit);

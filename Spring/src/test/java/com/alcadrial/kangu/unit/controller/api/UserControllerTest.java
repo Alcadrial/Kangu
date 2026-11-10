@@ -5,8 +5,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +43,7 @@ class UserControllerTest {
 	@WithMockUser(username = TestConstants.USERNAME)
 	public void getData() throws Exception
 	{
-		UserEntity.Safe user = new UserEntity.Safe(TestConstants.USERNAME, TestConstants.EMAIL, LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), OnlineStatus.ON);
+		UserEntity.Safe user = new UserEntity.Safe(TestConstants.USERNAME, TestConstants.EMAIL, TestConstants.TIME_0, TestConstants.TIME_1, TestConstants.TIME_2, OnlineStatus.ON);
 		when(userService.get(TestConstants.USERNAME)).thenReturn(user);
 		
 		mockMvc

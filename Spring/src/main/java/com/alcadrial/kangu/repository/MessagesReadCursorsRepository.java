@@ -1,6 +1,6 @@
 package com.alcadrial.kangu.repository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,9 +39,9 @@ public interface MessagesReadCursorsRepository extends CrudRepository<MessageRea
 	 * @param isBlockedByOther True if self is currently blocked by other
 	 */
 	record MessageReadCursorData(
-		LocalDateTime receiveTimestampOther,
-		LocalDateTime readTimestampSelf,
-		LocalDateTime readTimestampOther,
+		Instant receiveTimestampOther,
+		Instant readTimestampSelf,
+		Instant readTimestampOther,
 		boolean isBlockedBySelf,
 		boolean isBlockedByOther
 	) {}
@@ -73,10 +73,10 @@ public interface MessagesReadCursorsRepository extends CrudRepository<MessageRea
 		String username,
 		String lastMessage,
 		String lastMessageMimeType,
-		LocalDateTime messageTimestamp,
-		LocalDateTime receiveTimestampOther,
-		LocalDateTime readTimestampSelf,
-		LocalDateTime readTimestampOther,
+		Instant messageTimestamp,
+		Instant receiveTimestampOther,
+		Instant readTimestampSelf,
+		Instant readTimestampOther,
 		boolean isBlockedBySelf,
 		boolean isBlockedByOther
 	) {}

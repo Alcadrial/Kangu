@@ -1,11 +1,14 @@
 package com.alcadrial.kangu.utils;
 
+import java.time.Instant;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public class Constants {
 	
 	public static final GrantedAuthority ROLE_ADMIN_AUTHORITY = new SimpleGrantedAuthority("ROLE_ADMIN");
+	public static final Instant TIME_NEVER = Instant.ofEpochSecond(0);
 	
 	public static final String AUTHENTICATION_ERROR_CODE = "01";
 	public static final String BAD_CREDENTIALS_ERROR_CODE = AUTHENTICATION_ERROR_CODE + "000";

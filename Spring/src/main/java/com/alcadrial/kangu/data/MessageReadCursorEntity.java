@@ -1,8 +1,10 @@
 package com.alcadrial.kangu.data;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import org.jspecify.annotations.NonNull;
+
+import com.alcadrial.kangu.utils.Constants;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,14 +31,14 @@ public class MessageReadCursorEntity {
 	@Id
 	private @NonNull String receiver;
 	@Column
-	private @NonNull LocalDateTime receiveTimestamp;
+	private @NonNull Instant receiveTimestamp;
 	@Column
-	private @NonNull LocalDateTime readTimestamp;
+	private @NonNull Instant readTimestamp;
 	@Column
 	private boolean isBlocked;
 	
 	public MessageReadCursorEntity()
 	{
-		this("", "", LocalDateTime.of(2026, 1, 1, 0, 0), LocalDateTime.of(2026, 1, 1, 0, 0), false);
+		this("", "", Constants.TIME_NEVER, Constants.TIME_NEVER, false);
 	}
 }

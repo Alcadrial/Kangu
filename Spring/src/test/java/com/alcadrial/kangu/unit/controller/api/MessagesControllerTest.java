@@ -1,17 +1,14 @@
 package com.alcadrial.kangu.unit.controller.api;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -29,13 +26,13 @@ import com.alcadrial.kangu.TestConstants;
 import com.alcadrial.kangu.TestUtils;
 import com.alcadrial.kangu.api.MessagesController;
 import com.alcadrial.kangu.data.MessageEntity;
+import com.alcadrial.kangu.data.UserEntity;
 import com.alcadrial.kangu.exception.BlockedException;
 import com.alcadrial.kangu.exception.MessageTooLongException;
 import com.alcadrial.kangu.exception.MessagesCursorNotFoundException;
 import com.alcadrial.kangu.exception.UserNotFoundException;
 import com.alcadrial.kangu.repository.MessagesReadCursorsRepository.ChatPreviewData;
 import com.alcadrial.kangu.repository.MessagesReadCursorsRepository.MessageReadCursorData;
-import com.alcadrial.kangu.repository.MessagesRepository.Message;
 import com.alcadrial.kangu.service.MessagesService;
 import com.alcadrial.kangu.service.MessagesService.ChatDetailsAndMessages;
 
@@ -43,6 +40,35 @@ import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(MessagesController.class)
 class MessagesControllerTest {
+	
+	static final UserEntity SENDER_USER = TestConstants.USER;
+	static final UserEntity RECEIVER_USER = TestConstants.USER1;
+	static final String SENDER = TestConstants.USERNAME;
+	static final String RECEIVER = TestConstants.USERNAME1;
+	static final String RECEIVER1 = TestConstants.USERNAME2;
+	static final String EMAIL = TestConstants.EMAIL;
+	static final String PASSWORD = TestConstants.PASSWORD;
+	
+	static final String MESSAGE = TestConstants.MESSAGE;
+	static final String MESSAGE1 = TestConstants.MESSAGE1;
+	static final String MESSAGE2 = TestConstants.MESSAGE2;
+	static final String MESSAGE3 = TestConstants.MESSAGE3;
+	static final String MESSAGE4 = TestConstants.MESSAGE4;
+	static final String MESSAGE5 = TestConstants.MESSAGE5;
+	static final String MESSAGE6 = TestConstants.MESSAGE6;
+	static final String MESSAGE7 = TestConstants.MESSAGE7;
+	static final String MESSAGE8 = TestConstants.MESSAGE8;
+	
+	static final Instant T_0 = TestConstants.TIME_0;
+	static final Instant T_1 = TestConstants.TIME_1;
+	static final Instant T_2 = TestConstants.TIME_2;
+	static final Instant T_3 = TestConstants.TIME_3;
+	static final Instant T_4 = TestConstants.TIME_4;
+	static final Instant T_5 = TestConstants.TIME_5;
+	static final Instant T_6 = TestConstants.TIME_6;
+	static final Instant T_7 = TestConstants.TIME_7;
+	static final Instant T_8 = TestConstants.TIME_8;
+	static final Instant T_LAST = TestConstants.TIME_LAST;
 	
 	private MockMvc mockMvc;
 	
@@ -58,105 +84,108 @@ class MessagesControllerTest {
 	}
 	
 	@Test
-	@WithMockUser(username = TestConstants.USERNAME)
+	@WithMockUser(username = SENDER)
 	public void successSendMessage() throws Exception
 	{
-		MessageEntity[][] data = new MessageEntity[1][];
-		when(messagesService.sendMessage(anyString(), anyString(), anyString(), any())).thenAnswer(i -> {
-			return data[0] = new MessageEntity[] {
-				new MessageEntity(i.getArgument(0), i.getArgument(1), i.getArgument(2), MediaType.TEXT_PLAIN_VALUE, i.getArgument(3), 0)
-			};
-		});
+		MessageEntity[] message = {new MessageEntity(SENDER, RECEIVER, MESSAGE1, MediaType.TEXT_PLAIN_VALUE, T_0, 0)};
+		
+		when(messagesService.sendMessage(eq(SENDER), eq(RECEIVER), eq(MESSAGE1), any()))
+			.thenReturn(message);
 		
 		mockMvc
 			.perform(post("/api/messages/send")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(TestUtils.plainJson("receiver", TestConstants.USERNAME1, "message", TestConstants.MESSAGE1))
+				.content(TestUtils.plainJson("receiver", RECEIVER, "message", MESSAGE1))
 			)
 			.andExpect(status().isOk())
-			.andExpect(content().json(objectMapper.writeValueAsString(data[0])));
+			.andExpect(content().json(objectMapper.writeValueAsString(message)));
 	}
 	
 	@Test
-	@WithMockUser(username = TestConstants.USERNAME)
+	@WithMockUser(username = SENDER)
 	public void failSendMessageTooLong() throws Exception
 	{
-		doThrow(MessageTooLongException.class).when(messagesService).sendMessage(anyString(), anyString(), anyString(), any());
+		when(messagesService.sendMessage(eq(SENDER), eq(RECEIVER), eq(MESSAGE1), any()))
+			.thenThrow(MessageTooLongException.class);
 		
 		mockMvc
 			.perform(post("/api/messages/send")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(TestUtils.plainJson("receiver", TestConstants.USERNAME1, "message", TestConstants.MESSAGE1))
+				.content(TestUtils.plainJson("receiver", RECEIVER, "message", MESSAGE1))
 			)
 			.andExpect(status().isContentTooLarge());
 	}
 	
 	@Test
-	@WithMockUser(username = TestConstants.USERNAME)
+	@WithMockUser(username = SENDER)
 	public void failSendMessageUserNotFound() throws Exception
 	{
-		doThrow(UserNotFoundException.class).when(messagesService).sendMessage(anyString(), anyString(), anyString(), any());
+		when(messagesService.sendMessage(eq(SENDER), eq(RECEIVER), eq(MESSAGE1), any()))
+			.thenThrow(UserNotFoundException.class);
 		
 		mockMvc
 			.perform(post("/api/messages/send")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(TestUtils.plainJson("receiver", TestConstants.USERNAME1, "message", TestConstants.MESSAGE1))
+				.content(TestUtils.plainJson("receiver", RECEIVER, "message", MESSAGE1))
 			)
 			.andExpect(status().isNotFound());
 	}
 	
 	@Test
-	@WithMockUser(username = TestConstants.USERNAME)
+	@WithMockUser(username = SENDER)
 	public void failSendMessageBlocked() throws Exception
 	{
-		doThrow(BlockedException.class).when(messagesService).sendMessage(anyString(), anyString(), anyString(), any());
+		when(messagesService.sendMessage(eq(SENDER), eq(RECEIVER), eq(MESSAGE1), any()))
+			.thenThrow(BlockedException.class);
 		
 		mockMvc
 			.perform(post("/api/messages/send")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(TestUtils.plainJson("receiver", TestConstants.USERNAME1, "message", TestConstants.MESSAGE1))
+				.content(TestUtils.plainJson("receiver", RECEIVER, "message", MESSAGE1))
 			)
 			.andExpect(status().isConflict());
 	}
 	
 	@Test
-	@WithMockUser(username = TestConstants.USERNAME)
+	@WithMockUser(username = SENDER)
 	public void readLastMessages() throws Exception
 	{
 		ChatDetailsAndMessages data = new ChatDetailsAndMessages(List.of(
-			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m0", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_0, 0),
-			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m1", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_1, 0),
-			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m2", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_2, 0),
-			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m3", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_3, 0),
-			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m4", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_4, 0)
-		), new MessageReadCursorData(LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), false, false));
-		when(messagesService.readChatDetailsAndMessagesByArrivalTimestamp(eq(TestConstants.USERNAME), eq(TestConstants.USERNAME1), any(), anyInt()))
+			new MessageEntity(SENDER, RECEIVER, MESSAGE, MediaType.TEXT_PLAIN_VALUE, T_0, 0),
+			new MessageEntity(SENDER, RECEIVER, MESSAGE1, MediaType.TEXT_PLAIN_VALUE, T_1, 0),
+			new MessageEntity(SENDER, RECEIVER, MESSAGE2, MediaType.TEXT_PLAIN_VALUE, T_2, 0),
+			new MessageEntity(SENDER, RECEIVER, MESSAGE3, MediaType.TEXT_PLAIN_VALUE, T_3, 0),
+			new MessageEntity(SENDER, RECEIVER, MESSAGE4, MediaType.TEXT_PLAIN_VALUE, T_4, 0)
+		), new MessageReadCursorData(T_5, T_6, T_7, false, false));
+		
+		when(messagesService.readChatDetailsAndMessagesByArrivalTimestamp(SENDER, RECEIVER, null, 0))
 			.thenReturn(data);
 		
 		mockMvc
-			.perform(get("/api/messages/get?user=" + TestConstants.USERNAME1))
+			.perform(get("/api/messages/get?user=" + RECEIVER))
 			.andExpect(status().isOk())
 			.andExpect(content().json(objectMapper.writeValueAsString(data)));
 	}
 	
 	@Test
-	@WithMockUser(username = TestConstants.USERNAME)
+	@WithMockUser(username = SENDER)
 	public void readOldMessages() throws Exception
 	{
 		ChatDetailsAndMessages data = new ChatDetailsAndMessages(List.of(
-			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m0", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_0, 0),
-			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m1", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_1, 0),
-			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m2", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_2, 0),
-			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m3", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_3, 0),
-			new Message(TestConstants.USERNAME, TestConstants.USERNAME1, "m4", MediaType.TEXT_PLAIN_VALUE, TestConstants.TIME_4, 0)
-		), new MessageReadCursorData(LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), false, false));
-		when(messagesService.readChatDetailsAndMessagesByArrivalTimestamp(eq(TestConstants.USERNAME), eq(TestConstants.USERNAME1), any(LocalDateTime.class), eq(1)))
+			new MessageEntity(SENDER, RECEIVER, MESSAGE, MediaType.TEXT_PLAIN_VALUE, T_0, 0),
+			new MessageEntity(SENDER, RECEIVER, MESSAGE1, MediaType.TEXT_PLAIN_VALUE, T_1, 0),
+			new MessageEntity(SENDER, RECEIVER, MESSAGE2, MediaType.TEXT_PLAIN_VALUE, T_2, 0),
+			new MessageEntity(SENDER, RECEIVER, MESSAGE3, MediaType.TEXT_PLAIN_VALUE, T_3, 0),
+			new MessageEntity(SENDER, RECEIVER, MESSAGE4, MediaType.TEXT_PLAIN_VALUE, T_4, 0)
+		), new MessageReadCursorData(T_5, T_6, T_7, false, false));
+		
+		when(messagesService.readChatDetailsAndMessagesByArrivalTimestamp(SENDER, RECEIVER, T_4, 1))
 			.thenReturn(data);
 		
 		mockMvc
 			.perform(get("/api/messages/get")
-				.queryParam("user", TestConstants.USERNAME1)
-				.queryParam("before", TestConstants.TIME_4.toString())
+				.queryParam("user", RECEIVER)
+				.queryParam("before", T_4.toString())
 				.queryParam("part", "1")
 			)
 			.andExpect(status().isOk())
@@ -164,26 +193,27 @@ class MessagesControllerTest {
 	}
 	
 	@Test
-	@WithMockUser(username = TestConstants.USERNAME)
+	@WithMockUser(username = SENDER)
 	public void failReadMessages() throws Exception
 	{
-		when(messagesService.readChatDetailsAndMessagesByArrivalTimestamp(eq(TestConstants.USERNAME), eq(TestConstants.USERNAME1), any(), anyInt()))
-		.thenThrow(MessagesCursorNotFoundException.class);
+		when(messagesService.readChatDetailsAndMessagesByArrivalTimestamp(SENDER, RECEIVER, null, 0))
+			.thenThrow(MessagesCursorNotFoundException.class);
 		
 		mockMvc
-			.perform(get("/api/messages/get?user=" + TestConstants.USERNAME1))
+			.perform(get("/api/messages/get?user=" + RECEIVER))
 			.andExpect(status().isNotFound());
 	}
 	
 	@Test
-	@WithMockUser(username = TestConstants.USERNAME)
+	@WithMockUser(username = SENDER)
 	public void getChats() throws Exception
 	{
 		List<ChatPreviewData> data = List.of(
-			new ChatPreviewData(TestConstants.USERNAME1, TestConstants.MESSAGE1, MediaType.TEXT_PLAIN_VALUE, LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), false, false),
-			new ChatPreviewData(TestConstants.USERNAME2, TestConstants.MESSAGE2, MediaType.TEXT_PLAIN_VALUE, LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), false, false)
+			new ChatPreviewData(RECEIVER, MESSAGE1, MediaType.TEXT_PLAIN_VALUE, T_0, T_1, T_2, T_3, false, false),
+			new ChatPreviewData(RECEIVER1, MESSAGE2, MediaType.TEXT_PLAIN_VALUE, T_4, T_5, T_6, T_7, false, false)
 		);
-		when(messagesService.getChatsPreviews(eq(TestConstants.USERNAME)))
+		
+		when(messagesService.getChatsPreviews(SENDER))
 			.thenReturn(data);
 		
 		mockMvc
