@@ -2,7 +2,7 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, input, signal } from "@angul
 import { ChatListItem } from "./chatListItem";
 import { form, FormField, required } from "@angular/forms/signals";
 import { Router } from "@angular/router";
-import { Details } from "~services/chat.service";
+import { ChatPreview } from "~services/chat.service";
 import { TextInputComponent } from "~components/input";
 import DialogComponent from "~components/dialog";
 import SpinnerComponent from "~components/spinner";
@@ -17,7 +17,7 @@ export class ChatList {
 
     private readonly router = inject(Router);
 
-    readonly chats = input.required<Details[] | null>();
+    readonly chats = input.required<ChatPreview[] | null>();
     readonly isCreateConversationModalOpen = signal<boolean>(false);
 
     readonly newChatUsername = signal<string>("");

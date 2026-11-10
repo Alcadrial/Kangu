@@ -1,9 +1,8 @@
 import { Component, computed, effect, inject, input, signal } from "@angular/core";
 import { ChatList } from "../../components/chat/chatList";
 import { ChatMessages } from "../../components/chat/chatMessages";
-import { ActivatedRoute } from "@angular/router";
 import AlertService from "~services/alert.service";
-import ChatService, { ChatDetailsAndMessages, Details } from "~services/chat.service";
+import ChatService, { ChatDetailsAndMessages, ChatPreview, ChatPreviewAndMessages } from "~services/chat.service";
 import UserService from "~services/user.service";
 
 @Component({
@@ -12,7 +11,6 @@ import UserService from "~services/user.service";
 	templateUrl: "./chat.html"
 })
 export class Chat {
-    private readonly route = inject(ActivatedRoute);
     private readonly alertService = inject(AlertService);
     private readonly chatService = inject(ChatService);
     private readonly userService = inject(UserService);
@@ -21,17 +19,12 @@ export class Chat {
 
     readonly sender = computed(() => this.userService.user()?.username);
     readonly receiver = computed(() => this.user());
-/*
-    private readonly currentPath = toSignal(this.router.events.pipe(
-        filter((event) => event instanceof NavigationEnd),
-        map((event: NavigationEnd) => new URL(event.urlAfterRedirects))
-    ));*/
 
-    readonly currentChat = signal<ChatDetailsAndMessages | null>(null);
-    readonly isLoadingMessages = computed<boolean>(() => !!this.currentChat());
+    readonly currentChat = signal<ChatPreviewAndMessages | null>(null);
+    readonly isLoadingMessages = computed<boolean>(() => !this.currentChat());
 
-    readonly chats = signal<Details[] | null>(null);
-    readonly isLoadingChats = computed<boolean>(() => !!this.chats());
+    readonly chats = signal<ChatPreview[] | null>(null);
+    readonly isLoadingChats = computed<boolean>(() => !this.chats());
 
     readonly messageDraft = signal<string>("");
     readonly isSendingMessage = signal<boolean>(false);
@@ -56,8 +49,8 @@ export class Chat {
             next: details => {
                 this.chats.set(details);
             },
-            error: e => {
-                this.alertService.notifyError(e as string);
+            error: (e: Error) => {
+                this.alertService.notifyError(e.message);
             }
         });
     }
@@ -65,15 +58,26 @@ export class Chat {
     loadChatMessages() {
         const receiver = this.receiver();
         if (!receiver) return;
+
         this.currentChat.set(null);
         this.chatService.loadChatMessages(receiver).subscribe({
             next: chat => {
-                this.currentChat.set(chat);
+                const lastMessage = chat.messages[0];
+                this.currentChat.set({
+                    messages: chat.messages,
+                    preview: {
+                        ...chat.details,
+                        username: receiver,
+                        lastMessage: lastMessage.parts[0].message,
+                        lastMessageMimeType: lastMessage.parts[0].mimeType,
+                        messageTimestamp: lastMessage.timestamp
+                    }
+                });
             },
-            error: e => {
-                this.alertService.notifyError(e as string);
+            error: (e: Error) => {
+                this.alertService.notifyError(e.message);
             }
-        })
+        });
     }
     
     sendMessage(message: string): boolean {
@@ -83,14 +87,15 @@ export class Chat {
         if (!oldChat) return false;
 
         this.chatService.sendMessage(userId, message).subscribe({
-            next: newMessage => {
+            next: messages => {
                 this.currentChat.set({
-                    messages: [...oldChat.messages, newMessage],
-                    details: oldChat.details
+                    messages,
+                    preview: oldChat.preview
                 });
+                this.resetDraft();
             },
-            error: e => {
-                this.alertService.notifyError(e as string);
+            error: (e: Error) => {
+                this.alertService.notifyError(e.message);
             }
         });
         return true;

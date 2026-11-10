@@ -8,7 +8,7 @@ type RawMessage = {
     receiver: string;
     message: string;
     messageMimeType: string;
-    sendTimestamp: Date;
+    sendTimestamp: string;
     partIndex: number;
 }
 
@@ -16,6 +16,9 @@ type MessagesResponse = {
     messages: RawMessage[],
     details: Details
 }
+
+type ChatsResponse = ChatPreview[];
+type SendResponse = RawMessage[];
 
 export type MessagePart = {
     message: string;
@@ -26,17 +29,25 @@ export type Message = {
     sender: string;
     receiver: string;
     parts: MessagePart[];
-    timestamp: Date;
+    timestamp: string;
 }
 
-export type Details = {
+export type ChatPreview = {
     username: string;
     lastMessage: string;
     lastMessageMimeType: string;
-    messageTimestamp: Date;
-    receiveTimestampOther: Date;
-    readTimestampSelf: Date;
-    readTimestampOther: Date;
+    messageTimestamp: string;
+    receiveTimestampOther: string;
+    readTimestampSelf: string;
+    readTimestampOther: string;
+    isBlockedBySelf: boolean;
+    isBlockedByOther: boolean;
+}
+
+export type Details = {
+    receiveTimestampOther: string;
+    readTimestampSelf: string;
+    readTimestampOther: string;
     isBlockedBySelf: boolean;
     isBlockedByOther: boolean;
 }
@@ -46,7 +57,10 @@ export type ChatDetailsAndMessages = {
     details: Details
 }
 
-type ChatsResponse = Details[]
+export type ChatPreviewAndMessages = {
+    messages: Message[],
+    preview: ChatPreview
+}
 
 @Injectable({ providedIn: "root" })
 export default class ChatService {
@@ -64,7 +78,7 @@ export default class ChatService {
                 newMessages[++i] = {
                     sender: part.sender,
                     receiver: part.receiver,
-                    timestamp: new Date(part.sendTimestamp),
+                    timestamp: part.sendTimestamp,
                     parts: []
                 };
             }
@@ -76,7 +90,7 @@ export default class ChatService {
         return newMessages;
     }
 
-    loadChats(): Observable<Details[]> {
+    loadChats(): Observable<ChatPreview[]> {
         return this.http.get<ChatsResponse>("/api/messages/chats").pipe(handleHttpError());
     }
 
@@ -87,19 +101,20 @@ export default class ChatService {
             }
         }).pipe(
             map(r => this.data = {
-                messages: this.collectMessagesParts(r.messages),
+                messages: this.collectMessagesParts(r.messages).reverse(),
                 details: r.details
             }),
             handleHttpError()
         );
     }
 
-    sendMessage(receiver: string, message: string): Observable<Message> {
-        return this.http.post<MessagesResponse>("/api/messages/send", { receiver, message }).pipe(
+    sendMessage(receiver: string, message: string): Observable<Message[]> {
+        return this.http.post<SendResponse>("/api/messages/send", { receiver, message }).pipe(
             map(r => {
-                const message = this.collectMessagesParts(r.messages)[0];
-                this.data?.messages?.push(message);
-                return message;
+                if (!this.data) return [];
+                const message = this.collectMessagesParts(r)[0];
+                this.data.messages.push(message);
+                return this.data.messages;
             }),
             handleHttpError()
         );

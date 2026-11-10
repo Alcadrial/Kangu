@@ -2,7 +2,7 @@
 <div class="size-full flex flex-row">
     <chat-list [chats]="chats()" class="h-full w-max-60 w-min-20 w-[30%]"/>
     <chat-messages
-        class="size-full"
+        class="w-0 grow"
         [chat]="currentChat()"
         [messageDraft]="messageDraft()"
         [isLoadingMessages]="isLoadingMessages()"

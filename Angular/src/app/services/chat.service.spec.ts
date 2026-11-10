@@ -1,5 +1,5 @@
 import { TestBed } from "@angular/core/testing";
-import ChatService, { ChatDetailsAndMessages, Details } from "./chat.service";
+import ChatService, { ChatDetailsAndMessages, ChatPreview, Details } from "./chat.service";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { firstValueFrom } from "rxjs";
 import { HTTP_ERRORS } from "~utils/test";
@@ -29,14 +29,14 @@ describe("chat service", () => {
 
     describe("loadChats", () => {
         it("success", async () => {
-            const value: Details[] = [{
+            const value: ChatPreview[] = [{
                 username: "user",
                 lastMessage: "message",
                 lastMessageMimeType: "text/plain",
-                messageTimestamp: new Date(),
-                receiveTimestampOther: new Date(),
-                readTimestampSelf: new Date(),
-                readTimestampOther: new Date(),
+                messageTimestamp: new Date().toISOString(),
+                receiveTimestampOther: new Date().toISOString(),
+                readTimestampSelf: new Date().toISOString(),
+                readTimestampOther: new Date().toISOString(),
                 isBlockedBySelf: false,
                 isBlockedByOther: false
             }]
@@ -62,10 +62,10 @@ describe("chat service", () => {
     });
 
 
-    const T_0 = new Date(2026, 1, 1, 0, 0);
-    const T_1 = new Date(2026, 1, 1, 1, 0);
-    const T_2 = new Date(2026, 1, 1, 2, 0);
-    const T_3 = new Date(2026, 1, 1, 3, 0);
+    const T_0 = new Date(2026, 1, 1, 0, 0).toISOString();
+    const T_1 = new Date(2026, 1, 1, 1, 0).toISOString();
+    const T_2 = new Date(2026, 1, 1, 2, 0).toISOString();
+    const T_3 = new Date(2026, 1, 1, 3, 0).toISOString();
     const details = {
         username: "user",
         lastMessage: "message",
@@ -154,7 +154,7 @@ describe("chat service", () => {
                 r.body.message == "message2"
             ).flush({ messages: parts.slice(2, 3), details });
 
-            assert.deepEqual(await promise, merged[1]);
+            assert.deepEqual(await promise, merged.slice(1, 1));
         });
         it.for(HTTP_ERRORS)("fail with status $status", async ({ status, error }) => {
             const promise = firstValueFrom(service.sendMessage("user1", "message2"));
