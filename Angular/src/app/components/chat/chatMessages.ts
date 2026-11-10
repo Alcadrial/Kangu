@@ -1,14 +1,16 @@
-import { Component, effect, ElementRef, input, linkedSignal, output, viewChild } from "@angular/core";
+import { Component, effect, ElementRef, input, linkedSignal, output, signal, viewChild } from "@angular/core";
 import { form, FormField } from "@angular/forms/signals";
 import Separator from "~components/separator";
 import SpinnerComponent from "~components/spinner";
 import { ChatPreviewAndMessages } from "~services/chat.service";
 import { DatePipe } from "@angular/common";
 import MessageModule from "~directives/MessageDirective";
+import { LucideEllipsisVertical, LucideMoveDown } from "@lucide/angular";
 
 @Component({
     selector: "chat-messages",
-    imports: [Separator, FormField, SpinnerComponent, DatePipe, MessageModule],
+    imports: [Separator, FormField, SpinnerComponent, DatePipe, MessageModule, 
+        LucideMoveDown, LucideEllipsisVertical],
     templateUrl: "./chatMessages.html"
 })
 export class ChatMessages {
@@ -18,7 +20,10 @@ export class ChatMessages {
     readonly isSendingMessage = input.required<boolean>();
 
     readonly messageDraft = input.required<string>();
+
     private readonly message = linkedSignal(() => this.messageDraft());
+    readonly isNearBottom = signal<boolean>(false);
+
     readonly sendMessage = output<string>();
 
     readonly divRef = viewChild<ElementRef<HTMLDivElement>>("content");
@@ -29,9 +34,32 @@ export class ChatMessages {
         effect(() => {
             const content = this.divRef()?.nativeElement;
             if (content) {
-                content.scrollTop = content.scrollHeight;
+                const handle = () => {
+                    const s = content.scrollHeight - content.scrollTop;
+                    this.isNearBottom.set(s < 1.5 * content.clientHeight);
+                };
+                content.addEventListener("scroll", handle);
+                handle();
+                return () => {
+                    content.removeEventListener("scroll", handle);
+                };
             }
-        })
+            return () => {};
+        });
+        effect(() => {
+            this.scrollToBottom();
+        });
+    }
+
+    scrollToBottom() {
+        const content = this.divRef()?.nativeElement;
+        if (content) {
+            content.scrollTop = content.scrollHeight;
+        }
+    }
+
+    openUserMenu(username: string) {
+        
     }
 
     onSubmit(e: Event) {
