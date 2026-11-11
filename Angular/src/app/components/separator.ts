@@ -17,7 +17,7 @@ export default class Separator {
 
     classValue = computed(() => {
         const isVertical = this.isVertical() ?? false;
-        const color = this.color() ?? "bg-neutral-500";
+        const color = this.color() ?? "bg-surface-500";
         const w = this.w() ?? (isVertical ? "w-[1px]" : "w-[80%]");
         const h = this.h() ?? (isVertical ? "h-[80%]" : "h-[1px]");
         return `${w} ${h} ${color}`;

@@ -2,6 +2,7 @@ import { CanActivateChildFn, CanActivateFn, Router } from "@angular/router";
 import AuthService from "./services/auth.service";
 import { inject } from "@angular/core";
 import { catchError, map, of, retry } from "rxjs";
+import { translations } from "./translations";
 
 export const adminChildGuard: CanActivateChildFn = (childRoute, state) => {
     const authService = inject(AuthService);
@@ -17,7 +18,7 @@ export const userSpaceGuard: CanActivateChildFn = (childRoute, state) => {
         .pipe(
             map(result => result ? true : router.parseUrl("/login")),
             retry(2),
-            catchError(() => of(router.parseUrl("/login")))
+            catchError((e: string) => of(translations.serverConnectionFail == e ? true : router.parseUrl("/login")))
         );
 };
 

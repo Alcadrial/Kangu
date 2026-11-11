@@ -5,7 +5,7 @@
     @else if (chat(); as chat) {
         <div class="w-full h-24 p-4">
             <div class="flex flex-row justify-between items-center">
-                <h2>{{ chat.preview.username }}</h2>
+                <span class="text-4xl">{{ chat.preview.username }}</span>
                 <div (click)="openUserMenu(chat.preview.username)" class="p-1 cursor-pointer">
                     <svg lucideEllipsisVertical></svg>
                 </div>
@@ -24,7 +24,7 @@
                                     }
                                 </div>
                                 <div class="flex justify-end mt-1">
-                                    <span class="text-[10px] opacity-60 font-medium">{{message.timestamp | date:"HH:mm"}}</span>
+                                    <span class="text-[10px] opacity-60 font-medium">{{ message.timestamp | date: ((message.timestamp | sameDay) ? "shortTime" : "shortDate") }}</span>
                                 </div>
                             </div>
                         </div>
@@ -55,11 +55,7 @@
                             placeholder="Write your message"
                             [formField]="messageForm" />
                     </div>
-                    <button
-                        class="w-25 text-white border border-neutral-700 bg-neutral-800 enabled:cursor-pointer disabled:text-neutral-600 disabled:border-neutral-800 disabled:bg-neutral-900"
-                        type="submit"
-                        [disabled]="!message()"
-                    >
+                    <button class="plain" [disabled]="!message()">
                         Send
                     </button>
                 </form>

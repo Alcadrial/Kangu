@@ -1,6 +1,7 @@
 import { Component, inject, signal } from "@angular/core";
 import { form, submit, FormField, required } from "@angular/forms/signals";
 import { Router, RouterLink } from "@angular/router";
+import { TextInputComponent } from "~components/input";
 import AuthService from "~services/auth.service";
 
 interface LoginData {
@@ -11,7 +12,7 @@ interface LoginData {
 
 @Component({
     selector: "login-root",
-    imports: [RouterLink, FormField],
+    imports: [RouterLink, FormField, TextInputComponent],
     templateUrl: "./login.html"
 })
 export class Login {

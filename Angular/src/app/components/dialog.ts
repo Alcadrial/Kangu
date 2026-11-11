@@ -1,22 +1,38 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, input, model, output } from "@angular/core";
-
-import "@awesome.me/webawesome/dist/components/dialog/dialog.js";
+import { Component, effect, input, model, output } from "@angular/core";
+import { LucideX } from "@lucide/angular";
+import Separator from "./separator";
 
 @Component({
     selector: "app-dialog",
-    schemas: [CUSTOM_ELEMENTS_SCHEMA],
+    imports: [LucideX, Separator],
     template: `
-        <wa-dialog
-            [attr.light-dismiss]="lightDismiss() ? '' : null"
-            [label]="title()"
-            [open]="open()"
-            (wa-hide)="open.set(false)"
-        >
-            <ng-content />
-        </wa-dialog>
+        @if (open()) {
+            <div
+                class="fixed z-10 inset-0 flex justify-center items-center bg-surface-800/50"
+                (click)="onBackdropClick($event)"
+            >
+                <div class="relative max-w-[60%] max-h-[50%] bg-surface-800 border border-surface-400 rounded-sm" (click)="$event.stopPropagation()">
+                    <header class="py-3 px-4 flex flex-row justify-between items-center">
+                        <h2 class="text-xl">{{ title() }}</h2>
+                        <button
+                            class="p-1 border-none rounded-full cursor-pointer hover:bg-surface-700"
+                            title="Close this dialog"
+                            (click)="close($event)"
+                        >
+                            <svg lucideX size=20></svg>
+                        </button>
+                    </header>
+                    <separator w="w-[95%]" color="bg-surface-600"></separator>
+                    
+                    <section class="p-4">
+                        <ng-content></ng-content>
+                    </section>
+                </div>
+            </div>
+        }
     `
 })
-export default class DialogComponent {
+export class DialogComponent {
 
     readonly open = model<boolean>(false);
 
@@ -26,5 +42,14 @@ export default class DialogComponent {
 
     readonly submit = output<Event>();
 
-    //readonly backgroundClass = computed(() => `fixed z-1 size-full flex justify-center items-center ${this.forceFocus() ? "bg-surface-700/60" : "pointer-events-none"}`)
+    onBackdropClick(e: Event) {
+        if (this.lightDismiss()) {
+            this.open.set(false);
+        }
+    }
+
+    close(e: Event) {
+        e.preventDefault();
+        this.open.set(false);
+    }
 }

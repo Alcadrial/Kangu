@@ -1,5 +1,4 @@
-import { Directive, ElementRef, inject, input, Input, OnInit, Renderer2 } from "@angular/core";
-
+import { Directive, ElementRef, inject, input, OnInit } from "@angular/core";
 
 @Directive({
     selector: "[appMessage]"

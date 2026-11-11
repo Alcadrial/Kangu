@@ -31,7 +31,7 @@
                         ],
                         "styles": [
                             "src/styles.scss",
-                            "@awesome.me/webawesome/dist/styles/webawesome.css"
+                            "@awesome.me/webawesome/dist/styles/themes/default.css"
                         ],
                         "server": "src/main.server.ts",
                         "outputMode": "server",

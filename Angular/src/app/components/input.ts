@@ -1,45 +1,47 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, input, model, output } from "@angular/core";
-import { FormValueControl, ValidationError } from "@angular/forms/signals";
-
-import "@awesome.me/webawesome/dist/components/input/input.js";
+import { CommonModule } from "@angular/common";
+import { Component, input, model } from "@angular/core";
+import { ReactiveFormsModule } from "@angular/forms";
+import { FieldTree, FormField, FormValueControl } from "@angular/forms/signals";
 
 @Component({
     selector: "app-input",
-    standalone: true,
-    schemas: [CUSTOM_ELEMENTS_SCHEMA],
+    imports: [CommonModule, ReactiveFormsModule, FormField],
     template: `
-        <wa-input
-            [label]="label()"
-            [type]="type()"
-            [placeholder]="placeholder()"
-            [value]="value()"
-            [disabled]="disabled()"
-            [readonly]="readonly()"
-            [autofocus]="autofocus()"
-            [attr.aria-invalid]="invalid()"
-            (input)="value.set($any($event.target).value)"
-            (blur)="touch.emit()"
-        ></wa-input>
-
-        @if (invalid()) {
-            @for (error of errors(); track error) {
-                <div role="alert">{{ error.message }}</div>
-            }
-        }
+        @let formField = control();
+        <div class="group justify-items-end">
+            <label class="w-full flex flex-row items-center justify-items-start">
+                <span class="flex-1">{{ label() }}: </span>
+                <input
+                    class="w-58 px-4 py-1 rounded-none peer focus:outline-0"
+                    [type]="type()"
+                    [placeholder]="placeholder()"
+                    [autofocus]="autofocus()"
+                    [formField]="formField"
+                />
+            </label>
+            @let hasError = formField().invalid() && formField().touched();
+            <div [className]="hasError ?
+                'h-[1px] mx-0 bg-red-600 w-58 group-has-focus:w-full transition-all duration-150 ease-out' :
+                'h-[1px] mx-3 bg-amber-600 w-52 group-has-focus:w-full group-has-focus:m-0 transition-all duration-150 ease-out'
+            "></div>
+            <div class="w-58 h-6 flex flex-row gap-4">
+                @if (hasError) {
+                    @for (error of formField().errors(); track error) {
+                        <span class="w-58 px-4 py-[2px] text-red-600 text-sm">{{ error.message }}</span>
+                    }
+                }
+            </div>
+        </div>
   `,
 })
 export class TextInputComponent implements FormValueControl<string> {
-    value = model("");
 
-    label = input("");
-    type = input("text");
-    placeholder = input("");
+    readonly value = model("");
 
-    disabled = input(false);
-    readonly = input(false);
-    autofocus = input(false);
-    invalid = input(false);
-    errors = input<readonly ValidationError[]>([]);
+    readonly label = input<string>("");
+    readonly type = input<string>("text");
+    readonly placeholder = input<string>("");
+    readonly autofocus = input<"true" | "false" | "" | boolean>(false);
 
-    touch = output<void>();
+    readonly control = model.required<FieldTree<string>>({ alias: "formField" });
 }

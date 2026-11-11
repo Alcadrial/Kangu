@@ -12,7 +12,7 @@ export class PastTimePipe implements PipeTransform {
         if (isNaN(date.getTime())) return "unknown time";
 
         const diff = new Date(new Date().getTime() - date.getTime());
-        const diffSeconds = diff.getTime() / 1000;
+        const diffSeconds = diff.getTime() / 1000 | 0;
 
         if (Math.abs(diffSeconds) < 10) return "just now";
 

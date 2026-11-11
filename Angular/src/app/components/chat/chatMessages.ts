@@ -3,13 +3,14 @@ import { form, FormField } from "@angular/forms/signals";
 import Separator from "~components/separator";
 import SpinnerComponent from "~components/spinner";
 import { ChatPreviewAndMessages } from "~services/chat.service";
-import { DatePipe } from "@angular/common";
 import MessageModule from "~directives/MessageDirective";
 import { LucideEllipsisVertical, LucideMoveDown } from "@lucide/angular";
+import { SameDayPipe } from "~pipes/ShortDatePipe";
+import { DatePipe } from "@angular/common";
 
 @Component({
     selector: "chat-messages",
-    imports: [Separator, FormField, SpinnerComponent, DatePipe, MessageModule, 
+    imports: [Separator, FormField, SpinnerComponent, SameDayPipe, DatePipe, MessageModule, 
         LucideMoveDown, LucideEllipsisVertical],
     templateUrl: "./chatMessages.html"
 })

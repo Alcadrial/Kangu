@@ -1,7 +1,7 @@
 import { Component, inject, input } from "@angular/core";
+import { PastTimePipe } from "~pipes/PastTimePipe";
 import AuthService from "~services/auth.service";
 import { ChatPreview } from "~services/chat.service";
-import { PastTimePipe } from "../../pipes/pastTimePipe";
 
 @Component({
     selector: "chat-list-item",

@@ -19,6 +19,7 @@
       "~directives/*": ["./src/app/directives/*"],
       "~constants/*": ["./src/app/core/*"],
       "~services/*": ["./src/app/services/*"],
+      "~pipes/*": ["./src/app/pipes/*"],
       "~pages/*": ["./src/app/pages/*"],
       "~utils/*": ["./src/app/utils/*"],
       "~environments/*": ["./src/app/environments/*"]

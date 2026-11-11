@@ -4,31 +4,38 @@
             @for (chat of chats; track chat.username) {
                 <chat-list-item [chatPreview]="chat" class="border-neutral-700 cursor-pointer" (click)="openChat(chat.username)" />
             }
-            <wa-button appearance="plain" (click)="isCreateConversationModalOpen.set(true)">
-                <span>New conversation</span>
-            </wa-button>
+            <button class="inlinec flex flex-row justify-between gap-1" (click)="isCreateConversationModalOpen.set(true)">
+                <svg lucidePlus></svg>
+                <span class="truncate">New conversation</span>
+            </button>
+            <div class="border-neutral-700"></div>
 
             <app-dialog
-                title="Start a new conversation" 
+                [title]="'Start a new conversation'" 
                 [(open)]="isCreateConversationModalOpen"
                 (openChange)="!$event && onCloseDialog()"
             >
                 <form class="w-full flex flex-col items-end gap-1" (submit)="createNewConversation($event)">
                     <app-input 
-                        class="w-full"
                         label="User"
                         placeholder="username"
                         [autofocus]="true"
                         [formField]="newChatForm"
                     ></app-input>
-                    <wa-button
-                        type="submit"
-                        [disabled]="!newChatForm().value()"
-                    >
+
+                    <button class="primary" [disabled]="!newChatForm().value()">
                         Start chatting
-                    </wa-button>
+                    </button>
                 </form>
             </app-dialog>
+        </div>
+    }
+    @else if (error(); as error) {
+        <div>
+            {{ error }}
+            <button>
+                Try again
+            </button>
         </div>
     }
     @else {

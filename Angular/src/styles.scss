@@ -35,6 +35,21 @@
     --text-3xs: 0.5rem;
 }
 
+:where(:root) {
+    
+    --wa-color-gray-95: var(--color-surface-50);
+    --wa-color-gray-90: var(--color-surface-100);
+    --wa-color-gray-80: var(--color-surface-200);
+    --wa-color-gray-70: var(--color-surface-300);
+    --wa-color-gray-60: var(--color-surface-400);
+    --wa-color-gray-50: var(--color-surface-500);
+    --wa-color-gray-40: var(--color-surface-600);
+    --wa-color-gray-30: var(--color-surface-700);
+    --wa-color-gray-20: var(--color-surface-800);
+    --wa-color-gray-10: var(--color-surface-900);
+    --wa-color-gray-05: var(--color-surface-950);
+}
+
 main {
     width: 100%;
     height: 100vh;
@@ -48,14 +63,22 @@ main {
 }
 
 button {
-    border-width: 2px;
+    color: var(--color-surface-100);
+    padding: 6px;
+    border-width: 1px;
+    border-radius: 3px;
+    text-align: center;
+    cursor: pointer;
     &.primary {
         background-color: var(--color-primary-600);
         border-color: var(--color-primary-700);
         &:disabled {
             background-color: var(--color-primary-800);
             border-color: var(--color-primary-950);
-            color: var(--color-surface-300);
+        }
+        &:not(:disabled):hover {
+            background-color: var(--color-primary-500);
+            border-color: var(--color-primary-600);
         }
     }
     &.secondary {
@@ -64,12 +87,23 @@ button {
         &:disabled {
             background-color: var(--color-primary-900);
             border-color: var(--color-primary-950);
-            color: var(--color-surface-600);
+        }
+        &:not(:disabled):hover {
+            background-color: var(--color-primary-700);
+            border-color: var(--color-primary-800);
         }
     }
     &.plain {
         background-color: var(--color-surface-600);
         border-color: var(--color-surface-700);
+        &:disabled {
+            background-color: var(--color-surface-900);
+            border-color: var(--color-surface-950);
+        }
+        &:not(:disabled):hover {
+            background-color: var(--color-surface-700);
+            border-color: var(--color-surface-800);
+        }
     }
     &.success {
         background-color: var(--color-success-strong);
@@ -78,6 +112,19 @@ button {
     &.destructive {
         background-color: var(--color-error-strong);
         border-color: var(--color-error-weak);
+    }
+    &.inlinec {
+        padding: 6px 12px;
+        border: 0;
+        background-color: transparent;
+        border-color: transparent;
+    }
+    &:disabled {
+        color: var(--color-surface-300);
+        cursor: not-allowed;
+    }
+    &:not(:disabled):hover {
+        color: var(--color-surface-50);
     }
 }
 

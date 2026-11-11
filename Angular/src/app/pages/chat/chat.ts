@@ -16,18 +16,20 @@ export class Chat {
     private readonly userService = inject(UserService);
 
     readonly user = input<string>();
-
+    
     readonly sender = computed(() => this.userService.user()?.username);
     readonly receiver = computed(() => this.user());
-
+    
     readonly currentChat = signal<ChatPreviewAndMessages | null>(null);
     readonly isLoadingMessages = computed<boolean>(() => !this.currentChat());
-
+    
     readonly chats = signal<ChatPreview[] | null>(null);
     readonly isLoadingChats = computed<boolean>(() => !this.chats());
-
+    
     readonly messageDraft = signal<string>("");
     readonly isSendingMessage = signal<boolean>(false);
+
+    readonly error = signal<string | null>(null);
 
     constructor() {
         effect(() => {
@@ -76,6 +78,7 @@ export class Chat {
             },
             error: (e: Error) => {
                 this.alertService.notifyError(e.message);
+                this.error.set("An error occurred while loading the chats");
             }
         });
     }
@@ -96,6 +99,7 @@ export class Chat {
             },
             error: (e: Error) => {
                 this.alertService.notifyError(e.message);
+                this.error.set("An error occurred while loading the chats");
             }
         });
         return true;
