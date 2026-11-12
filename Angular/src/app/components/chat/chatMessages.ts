@@ -24,6 +24,8 @@ export class ChatMessages {
 
     private readonly message = linkedSignal(() => this.messageDraft());
     readonly isNearBottom = signal<boolean>(false);
+    readonly isAtTop = signal<boolean>(false);
+    readonly isAtBottom = signal<boolean>(true);
 
     readonly sendMessage = output<string>();
 
@@ -38,6 +40,8 @@ export class ChatMessages {
                 const handle = () => {
                     const s = content.scrollHeight - content.scrollTop;
                     this.isNearBottom.set(s < 1.5 * content.clientHeight);
+                    this.isAtTop.set(content.scrollTop < 10);
+                    this.isAtBottom.set(s < 10 + content.clientHeight);
                 };
                 content.addEventListener("scroll", handle);
                 handle();
