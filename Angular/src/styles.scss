@@ -97,6 +97,7 @@ button {
         background-color: var(--color-surface-600);
         border-color: var(--color-surface-700);
         &:disabled {
+            color: var(--color-surface-600);
             background-color: var(--color-surface-900);
             border-color: var(--color-surface-950);
         }
@@ -130,8 +131,12 @@ button {
 
 input {
     outline: 0px;
-    &.inline {
+    &.inlinec {
         margin: 8px 0px;
+    }
+    &:disabled {
+        color: var(--color-surface-700);
+        cursor: not-allowed;
     }
 }
 

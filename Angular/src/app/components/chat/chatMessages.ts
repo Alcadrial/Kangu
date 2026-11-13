@@ -29,13 +29,14 @@ export class ChatMessages {
 
     readonly sendMessage = output<string>();
 
-    readonly divRef = viewChild<ElementRef<HTMLDivElement>>("content");
+    readonly contentRef = viewChild<ElementRef<HTMLDivElement>>("content");
+    readonly containerRef = viewChild<ElementRef<HTMLDivElement>>("container");
 
     messageForm = form(this.message);
 
     constructor() {
         effect(() => {
-            const content = this.divRef()?.nativeElement;
+            const content = this.contentRef()?.nativeElement;
             if (content) {
                 const handle = () => {
                     const s = content.scrollHeight - content.scrollTop;
@@ -52,12 +53,18 @@ export class ChatMessages {
             return () => {};
         });
         effect(() => {
+            //on chat updates
+            this.chat();
+            if (this.isAtBottom()) {
+                setTimeout(() => {
             this.scrollToBottom();
+        });
+    }
         });
     }
 
     scrollToBottom() {
-        const content = this.divRef()?.nativeElement;
+        const content = this.contentRef()?.nativeElement;
         if (content) {
             content.scrollTop = content.scrollHeight;
         }

@@ -19,26 +19,25 @@
                         @if (!isAtTop()) {
                             <div class="absolute z-10 top-0 left-0 h-15 w-full bg-linear-to-b from-black pointer-events-none"></div>
                         }
-                    @for (message of chat.messages; track message.timestamp) {
-                        <div [appMessage]="chat.preview.username == message.sender ? 'left' : 'right'" class="w-full flex flex-row">
-                            <div class="relative max-w-[70%] min-w-10 p-2 flex flex-col rounded-sm bg-surface-700 shadow-sm">
-                                <div class="flex flex-col gap-1">
-                                    @for (part of message.parts; track $index) {
-                                        <span class="text-wrap break-words leading-relaxed text-sm">{{part.message}}</span>
-                                    }
-                                </div>
-                                <div class="flex justify-end mt-1">
-                                    <span class="text-[10px] opacity-60 font-medium">{{ message.timestamp | date: ((message.timestamp | sameDay) ? "shortTime" : "shortDate") }}</span>
+                        @for (message of chat.messages; track message.timestamp) {
+                            <div [appMessage]="chat.preview.username == message.sender ? 'left' : 'right'" class="w-full flex flex-row">
+                                <div class="relative max-w-[70%] min-w-10 p-2 flex flex-col rounded-sm bg-surface-700 shadow-sm">
+                                    <div class="flex flex-col gap-1">
+                                        @for (part of message.parts; track $index) {
+                                            <span class="text-wrap break-words leading-relaxed text-sm">{{part.message}}</span>
+                                        }
+                                    </div>
+                                    <div class="flex justify-end mt-1">
+                                        <span class="text-[10px] opacity-60 font-medium">{{ message.timestamp | date: ((message.timestamp | sameDay) ? "shortTime" : "shortDate") }}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    }
-                </div>
-                @if (!isNearBottom()) {
+                        }
+                        @if (!isNearBottom()) {
                             <div (click)="scrollToBottom()" class="absolute right-6 bottom-6 p-1 bg-surface-800 border border-surface-500 rounded-full cursor-pointer">
-                        <svg lucideMoveDown></svg>
-                    </div>
-                }
+                                <svg lucideMoveDown></svg>
+                            </div>
+                        }
                         @if (!isAtBottom()) {
                             <div class="absolute z-10 bottom-0 left-0 h-5 w-full bg-linear-to-t from-black pointer-events-none"></div>
                         }
@@ -53,20 +52,36 @@
         }
         <separator class="w-full" w="w-full"/>
         <div class="w-full h-16">
-            <div class="size-full p-4">
+            <div class="size-full p-2">
                 <form (submit)="onSubmit($event)" class="size-full flex flex-row gap-2">
-                    <div class="w-0 grow flex flex-row">
-                        <separator class="flex flex-row items-center pr-2" [isVertical]=true h="h-full" color="bg-neutral-700" />
-                        <input
-                            inline
-                            class="rounded-none focus:outline-0"
-                            type="text"
-                            placeholder="Write your message"
-                            [formField]="messageForm" />
-                    </div>
-                    <button class="plain" [disabled]="!message()">
-                        Send
-                    </button>
+                    @if (chat.preview.isBlockedByOther) {
+                        <div class="w-0 grow pl-2 py-2 flex flex-row">
+                            <separator class="flex flex-row items-center pr-2" [isVertical]=true h="h-full" color="bg-neutral-700" />
+                            <input
+                                inlinec
+                                type="text"
+                                placeholder="Write your message"
+                                disabled
+                            />
+                        </div>
+                        <button class="plain" disabled >
+                            Send
+                        </button>
+                    }
+                    @else {
+                        <div class="w-0 grow flex flex-row">
+                            <separator class="flex flex-row items-center pr-2" [isVertical]=true h="h-full" color="bg-neutral-700" />
+                            <input
+                                inlinec
+                                type="text"
+                                placeholder="Write your message"
+                                [formField]="messageForm"
+                            />
+                        </div>
+                        <button class="plain" [disabled]="!message()">
+                            Send
+                        </button>
+                    }
                 </form>
             </div>
         </div>
