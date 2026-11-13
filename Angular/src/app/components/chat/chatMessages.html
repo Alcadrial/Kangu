@@ -4,8 +4,16 @@
     }
     @else if (chat(); as chat) {
         <div class="w-full h-24 p-4">
-            <div class="flex flex-row justify-between items-center">
-                <span class="text-4xl">{{ chat.preview.username }}</span>
+            <div class="size-full flex flex-row justify-between items-center">
+                @if (chat.preview.isBlockedBySelf) {
+                    <div class="flex flex-row items-center gap-2">
+                        <svg lucideCircleOff></svg>
+                        <span class="text-4xl">{{ chat.preview.username }}</span>
+                    </div>
+                }
+                @else {
+                    <span class="text-4xl">{{ chat.preview.username }}</span>
+                }
                 <div (click)="openUserMenu(chat.preview.username)" class="p-1 cursor-pointer">
                     <svg lucideEllipsisVertical></svg>
                 </div>

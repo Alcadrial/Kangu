@@ -4,14 +4,15 @@ import Separator from "~components/separator";
 import SpinnerComponent from "~components/spinner";
 import { ChatPreviewAndMessages } from "~services/chat.service";
 import MessageModule from "~directives/MessageDirective";
-import { LucideEllipsisVertical, LucideMoveDown } from "@lucide/angular";
+import { LucideCircleOff, LucideEllipsisVertical, LucideMoveDown } from "@lucide/angular";
 import { SameDayPipe } from "~pipes/ShortDatePipe";
 import { DatePipe } from "@angular/common";
+
 
 @Component({
     selector: "chat-messages",
     imports: [Separator, FormField, SpinnerComponent, SameDayPipe, DatePipe, MessageModule, 
-        LucideMoveDown, LucideEllipsisVertical],
+        LucideMoveDown, LucideEllipsisVertical, LucideCircleOff],
     templateUrl: "./chatMessages.html"
 })
 export class ChatMessages {
@@ -50,16 +51,16 @@ export class ChatMessages {
                     content.removeEventListener("scroll", handle);
                 };
             }
-            return () => {};
+            return () => { };
         });
         effect(() => {
             //on chat updates
             this.chat();
             if (this.isAtBottom()) {
                 setTimeout(() => {
-            this.scrollToBottom();
-        });
-    }
+                    this.scrollToBottom();
+                });
+            }
         });
     }
 
