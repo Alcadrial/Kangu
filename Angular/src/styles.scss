@@ -119,6 +119,23 @@ button {
         border: 0;
         background-color: transparent;
         border-color: transparent;
+        &:hover {
+            background-color: var(--color-surface-800);
+        }
+    }
+    &.icon {
+        padding: 4px;
+        border-radius: 9999px;
+    }
+    &.fill {
+        padding: 4px 10px;
+        border-radius: 0px;
+        border-width: 0px;
+        size: 100%;
+    }
+    &.small {
+        padding: 2px 4px;
+        font-size: small;
     }
     &:disabled {
         color: var(--color-surface-300);

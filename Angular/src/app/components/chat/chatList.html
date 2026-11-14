@@ -1,14 +1,16 @@
 <div class="size-full border-r border-neutral-700">
     @if (chats(); as chats) {
-        <div class="w-full p-2 flex flex-col divide-y overflow-y-auto">
-            @for (chat of chats; track chat.username) {
-                <chat-list-item [chatPreview]="chat" class="border-neutral-700 cursor-pointer" (click)="openChat(chat.username)" />
-            }
-            <button class="inlinec flex flex-row justify-between gap-1" (click)="isCreateConversationModalOpen.set(true)">
+        <div class="size-full flex flex-col justify-between overflow-y-auto">
+            <div class="h-0 grow w-full p-2 flex flex-col divide-y">
+                @for (chat of chats; track chat.username) {
+                    <chat-list-item [chatPreview]="chat" class="last:border-b hover:bg-surface-800 border-surface-600 cursor-pointer" (click)="openChat(chat.username)" />
+                }
+            </div>
+            <separator w="w-[95%]"></separator>
+            <button class="inlinec h-10 sticky bottom-0 flex flex-row justify-between items-center gap-1 fill" (click)="isCreateConversationModalOpen.set(true)">
                 <svg lucidePlus></svg>
                 <span class="truncate">New conversation</span>
             </button>
-            <div class="border-neutral-700"></div>
 
             <app-dialog
                 [title]="'Start a new conversation'" 

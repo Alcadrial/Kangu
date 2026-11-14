@@ -3,7 +3,7 @@
         <app-spinner size="md"></app-spinner>
     }
     @else if (chat(); as chat) {
-        <div class="w-full h-24 p-4">
+        <div class="w-full h-16 py-2 px-4">
             <div class="size-full flex flex-row justify-between items-center">
                 @if (chat.preview.isBlockedBySelf) {
                     <div class="flex flex-row items-center gap-2">
@@ -14,9 +14,9 @@
                 @else {
                     <span class="text-4xl">{{ chat.preview.username }}</span>
                 }
-                <div (click)="openUserMenu(chat.preview.username)" class="p-1 cursor-pointer">
+                <button (click)="openUserMenu(chat.preview.username)" class="inlinec icon">
                     <svg lucideEllipsisVertical></svg>
-                </div>
+                </button>
             </div>
         </div>
         <separator class="w-full" w="w-full"/>
@@ -59,12 +59,12 @@
             </div>
         }
         <separator class="w-full" w="w-full"/>
-        <div class="w-full h-16">
+        <div class="w-full h-10">
             <div class="size-full p-2">
                 <form (submit)="onSubmit($event)" class="size-full flex flex-row gap-2">
                     @if (chat.preview.isBlockedByOther) {
-                        <div class="w-0 grow pl-2 py-2 flex flex-row">
-                            <separator class="flex flex-row items-center pr-2" [isVertical]=true h="h-full" color="bg-neutral-700" />
+                        <div class="w-0 grow flex flex-row">
+                            <separator class="flex flex-row items-center pr-2" [isVertical]=true h="h-full" color="bg-surface-700" />
                             <input
                                 inlinec
                                 type="text"
@@ -72,13 +72,13 @@
                                 disabled
                             />
                         </div>
-                        <button class="plain" disabled >
+                        <button class="plain small" disabled >
                             Send
                         </button>
                     }
                     @else {
                         <div class="w-0 grow flex flex-row">
-                            <separator class="flex flex-row items-center pr-2" [isVertical]=true h="h-full" color="bg-neutral-700" />
+                            <separator class="flex flex-row items-center pr-2" [isVertical]=true h="h-full" color="bg-surface-700" />
                             <input
                                 inlinec
                                 type="text"
@@ -86,7 +86,7 @@
                                 [formField]="messageForm"
                             />
                         </div>
-                        <button class="plain" [disabled]="!message()">
+                        <button class="plain small" [disabled]="!message()">
                             Send
                         </button>
                     }

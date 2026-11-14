@@ -7,10 +7,11 @@ import { TextInputComponent } from "~components/input";
 import { DialogComponent } from "~components/dialog";
 import SpinnerComponent from "~components/spinner";
 import { LucidePlus } from "@lucide/angular";
+import Separator from "~components/separator";
 
 @Component({
     selector: "chat-list",
-    imports: [ChatListItem, TextInputComponent, DialogComponent, SpinnerComponent, FormField, LucidePlus],
+    imports: [ChatListItem, TextInputComponent, Separator, DialogComponent, SpinnerComponent, FormField, LucidePlus],
     templateUrl: "./chatList.html"
 })
 export class ChatList {
