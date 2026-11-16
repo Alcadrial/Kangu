@@ -35,6 +35,11 @@
     --color-error-strong: #C90404;
     --text-2xs: 0.625rem;
     --text-3xs: 0.5rem;
+
+    --color-status-online: #68E529;
+    --color-status-afk: #E2C60D;
+    --color-status-offline: #CE3A00;
+    --color-status-unknown: #C6C6C6;
 }
 
 :where(:root) {

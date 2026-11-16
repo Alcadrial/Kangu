@@ -45,8 +45,12 @@ export function errorInterceptor(
     return next(request).pipe(catchError((error: HttpErrorResponse) => {
         const status = error.status;
         if (status == 403) {
-            authService.logout();
-            alertService.notifyError(translations.unknownError);
+            if (error.url) {
+                const { pathname } = new URL(error.url);
+                if (pathname == AUTHENTICATION_URLS.logout) throw error;
+            }
+            authService.logout().subscribe();
+            //alertService.notifyError(translations.unknownError);
             router.navigate([AUTHENTICATION_URLS.login]);
         }
         throw error;
