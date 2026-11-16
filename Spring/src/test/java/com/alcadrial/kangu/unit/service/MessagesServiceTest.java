@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -19,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import com.alcadrial.kangu.TestConstants;
 import com.alcadrial.kangu.data.MessageEntity;
@@ -34,6 +36,7 @@ import com.alcadrial.kangu.repository.MessagesRepository;
 import com.alcadrial.kangu.repository.UserRepository;
 import com.alcadrial.kangu.service.MessagesService;
 import com.alcadrial.kangu.service.MessagesService.ChatDetailsAndMessages;
+import com.alcadrial.kangu.utils.Constants;
 
 @ExtendWith(MockitoExtension.class)
 class MessagesServiceTest {
@@ -60,6 +63,8 @@ class MessagesServiceTest {
 	private MessagesProperties messagesProperties;
 	@Mock
 	private MessageReadCursorEntity messageReadCursorEntity;
+	@Mock
+	private KafkaTemplate<String, Object> kafkaTemplate;
 	@InjectMocks
 	private MessagesService messagesService;
 	
@@ -77,6 +82,7 @@ class MessagesServiceTest {
 	void successSendMessageSinglePart() throws Exception
 	{
 		MessageEntity message = new MessageEntity(SENDER, RECEIVER, MESSAGE, MediaType.TEXT_PLAIN_VALUE, T_0, 0);
+		MessageEntity[] messages = new MessageEntity[] { message };
 		
 		when(messagesProperties.getMaxMessageSize()).thenReturn(100);
 		when(userRepository.existsById(RECEIVER)).thenReturn(true);
@@ -84,13 +90,16 @@ class MessagesServiceTest {
 		when(messagesProperties.getMaxMessageBlockSize()).thenReturn(50);
 		when(messagesRepository.save(message)).thenReturn(message);
 		
-		assertArrayEquals(new MessageEntity[] { message }, messagesService.sendMessage(SENDER, RECEIVER, MESSAGE, T_0));
+		assertArrayEquals(messages, messagesService.sendMessage(SENDER, RECEIVER, MESSAGE, T_0));
+		
+		verify(kafkaTemplate).send(Constants.MESSAGES_TOPIC, RECEIVER, messages);
 	}
 	
 	@Test
 	void successSendMessageWithoutChat() throws Exception
 	{
 		MessageEntity message = new MessageEntity(SENDER, RECEIVER, MESSAGE, MediaType.TEXT_PLAIN_VALUE, T_0, 0);
+		MessageEntity[] messages = new MessageEntity[] { message };
 		
 		when(messagesProperties.getMaxMessageSize()).thenReturn(100);
 		when(userRepository.existsById(RECEIVER)).thenReturn(true);
@@ -98,7 +107,9 @@ class MessagesServiceTest {
 		when(messagesProperties.getMaxMessageBlockSize()).thenReturn(50);
 		when(messagesRepository.save(message)).thenReturn(message);
 		
-		assertArrayEquals(new MessageEntity[] { message }, messagesService.sendMessage(SENDER, RECEIVER, MESSAGE, T_0));
+		assertArrayEquals(messages, messagesService.sendMessage(SENDER, RECEIVER, MESSAGE, T_0));
+		
+		verify(kafkaTemplate).send(Constants.MESSAGES_TOPIC, RECEIVER, messages);
 	}
 	
 	@Test
@@ -119,6 +130,8 @@ class MessagesServiceTest {
 		when(messagesRepository.save(messages[2])).thenReturn(messages[2]);
 		
 		assertArrayEquals(messages, messagesService.sendMessage(SENDER, RECEIVER, "a".repeat(5) + "b".repeat(5) + "c".repeat(5), T_0));
+
+		verify(kafkaTemplate).send(Constants.MESSAGES_TOPIC, RECEIVER, messages);
 	}
 	
 	@Test
@@ -155,27 +168,44 @@ class MessagesServiceTest {
 	}
 	
 	@Test
-	void successBlockUnblockUser()
+	void successBlockUser()
 	{
 		MessageReadCursorEntity.PrimaryKey key = new MessageReadCursorEntity.PrimaryKey(SENDER, RECEIVER);
+		
 		when(messagesReadCursorsRepository.findById(key)).thenReturn(Optional.of(messageReadCursorEntity));
 		
 		messagesService.blockUser(SENDER, RECEIVER);
+		
 		verify(messageReadCursorEntity).setBlocked(true);
+		verify(kafkaTemplate).send(Constants.CURSORS_TOPIC, SENDER, messageReadCursorEntity);
+	}
+	
+	@Test
+	void successUnblockUser()
+	{
+		MessageReadCursorEntity.PrimaryKey key = new MessageReadCursorEntity.PrimaryKey(SENDER, RECEIVER);
+		
+		when(messagesReadCursorsRepository.findById(key)).thenReturn(Optional.of(messageReadCursorEntity));
+		
 		messagesService.unblockUser(SENDER, RECEIVER);
+		
 		verify(messageReadCursorEntity).setBlocked(false);
+		verify(kafkaTemplate).send(Constants.CURSORS_TOPIC, SENDER, messageReadCursorEntity);
 	}
 	
 	@Test
 	void successBlockUnblockNothing()
 	{
 		MessageReadCursorEntity.PrimaryKey key = new MessageReadCursorEntity.PrimaryKey(SENDER, RECEIVER);
+		
 		when(messagesReadCursorsRepository.findById(key)).thenReturn(Optional.empty());
 		
 		assertDoesNotThrow(() -> {
 			messagesService.blockUser(SENDER, RECEIVER);
 			messagesService.unblockUser(SENDER, RECEIVER);
 		});
+		
+		verifyNoInteractions(kafkaTemplate);
 	}
 	
 	@Test

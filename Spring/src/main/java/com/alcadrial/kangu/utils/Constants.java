@@ -10,6 +10,9 @@ public class Constants {
 	public static final GrantedAuthority ROLE_ADMIN_AUTHORITY = new SimpleGrantedAuthority("ROLE_ADMIN");
 	public static final Instant TIME_NEVER = Instant.ofEpochSecond(0);
 	
+	public static final String MESSAGES_TOPIC = "messages";
+	public static final String CURSORS_TOPIC = "cursors";
+	
 	public static final String AUTHENTICATION_ERROR_CODE = "01";
 	public static final String BAD_CREDENTIALS_ERROR_CODE = AUTHENTICATION_ERROR_CODE + "000";
 	public static final String DISABLED_ERROR_CODE = AUTHENTICATION_ERROR_CODE + "001";
@@ -18,6 +21,7 @@ public class Constants {
 	public static final String EXPIRED_CREDENTIALS_ERROR_CODE = AUTHENTICATION_ERROR_CODE + "004";
 	
 	public static final String AUTHORIZATION_ERROR_CODE = "02";
+	public static final String MISSING_AUTHORIZATION_ERROR_CODE = AUTHORIZATION_ERROR_CODE + "000";
 	
 	public static final String INTERNAL_ERROR_CODE = "10";
 	public static final String KNOWN_INTERNAL_ERROR_CODE = INTERNAL_ERROR_CODE + "000";

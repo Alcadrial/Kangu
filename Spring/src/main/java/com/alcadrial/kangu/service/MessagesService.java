@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.MediaType;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +38,8 @@ public class MessagesService {
 	private final MessagesRepository messagesRepository;
 	private final MessagesReadCursorsRepository messagesReadCursorsRepository;
 	private final MessagesProperties messagesProperties;
+	private final KafkaTemplate<String, MessageEntity[]> kafkaMessagesTemplate;
+	private final KafkaTemplate<String, MessageReadCursorEntity> kafkaCursorsTemplate;
 	
 	public MessageEntity[] sendMessage(String sender, String receiver, String message, Instant time) throws MessageTooLongException, UserNotFoundException, BlockedException
 	{
@@ -46,7 +49,7 @@ public class MessagesService {
 		Optional<Boolean> senderBlockedOptional = messagesReadCursorsRepository.isSenderBlocked(sender, receiver);
 		if (senderBlockedOptional.orElse(false)) throw new BlockedException();
 		
-		//first message in chat
+		//Lazily create chat cursors
 		if (senderBlockedOptional.isEmpty())
 		{
 			messagesReadCursorsRepository.save(new MessageReadCursorEntity(sender, receiver, Constants.TIME_NEVER, Constants.TIME_NEVER, false));
@@ -63,17 +66,26 @@ public class MessagesService {
 			message = message.substring(blockSize);
 		}
 		blocks[partIndex] = messagesRepository.save(new MessageEntity(sender, receiver, message, MediaType.TEXT_PLAIN_VALUE, time, partIndex));
+		
+		kafkaMessagesTemplate.send(Constants.MESSAGES_TOPIC, receiver, blocks);
+		
 		return blocks;
 	}
 	
 	public void blockUser(String sender, String receiver)
 	{
-		messagesReadCursorsRepository.findById(new PrimaryKey(sender, receiver)).ifPresent(e -> e.setBlocked(true));
+		messagesReadCursorsRepository.findById(new PrimaryKey(sender, receiver)).ifPresent(e -> {
+			e.setBlocked(true);
+			kafkaCursorsTemplate.send(Constants.CURSORS_TOPIC, sender, e);
+		});
 	}
 	
 	public void unblockUser(String sender, String receiver)
 	{
-		messagesReadCursorsRepository.findById(new PrimaryKey(sender, receiver)).ifPresent(e -> e.setBlocked(false));
+		messagesReadCursorsRepository.findById(new PrimaryKey(sender, receiver)).ifPresent(e -> {
+			e.setBlocked(false);
+			kafkaCursorsTemplate.send(Constants.CURSORS_TOPIC, sender, e);
+		});
 	}
 	
 	public static record ChatDetailsAndMessages(
@@ -90,7 +102,8 @@ public class MessagesService {
 		int bit1 = sender.equals(receiver) ? 1 : 0;
 		int key = bit1 << 1 | bit0;
 		
-		List<MessageEntity> messages = switch (key) {
+		List<MessageEntity> messages = switch (key)
+		{
 			case 0 -> messagesRepository.findMessagesSentOrReceivedBeforeTimeAndPart(sender, receiver, (@NonNull Instant) time, part, limit);
 			case 1 -> messagesRepository.findMessagesSentOrReceived(sender, receiver, limit);
 			case 2 -> messagesRepository.findMessagesSelfSentBeforeTimeAndPart(sender, (@NonNull Instant) time, part, limit);
@@ -106,7 +119,6 @@ public class MessagesService {
 		return new ChatDetailsAndMessages(messages, data);
 	}
 	
-
 	@Transactional(readOnly = true)
 	public List<ChatPreviewData> getChatsPreviews(String username)
 	{
