@@ -96,9 +96,11 @@ CREATE TABLE messages(
 	PRIMARY KEY (sender, receiver, send_timestamp, part_index),
 	DOMAIN accepted_mime_type_d (message_mime_type),
 	CONSTRAINT "fKey_messages_sender_users_username"
-		FOREIGN KEY (sender) REFERENCES users(username),
+		FOREIGN KEY (sender) REFERENCES users(username)
+		ON DELETE CASCADE,
 	CONSTRAINT "fKey_messages_receiver_users_username"
 		FOREIGN KEY (receiver) REFERENCES users(username)
+		ON DELETE CASCADE
 );
 
 CREATE TABLE messages_read_cursors(
@@ -109,9 +111,11 @@ CREATE TABLE messages_read_cursors(
 	is_blocked BOOLEAN DEFAULT false NOT NULL,
 	PRIMARY KEY (sender, receiver),
 	CONSTRAINT "fKey_messagesReadCursors_sender_users_username"
-		FOREIGN KEY (sender) REFERENCES users(username),
+		FOREIGN KEY (sender) REFERENCES users(username)
+		ON DELETE CASCADE,
 	CONSTRAINT "fKey_messagesReadCursors_receiver_users_username"
 		FOREIGN KEY (receiver) REFERENCES users(username)
+		ON DELETE CASCADE
 );
 
 CREATE INDEX messages_sender_receiver_index
