@@ -104,4 +104,13 @@ export class Chat {
         });
         return true;
     }
+
+    logout() {
+        this.authService.logout()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                complete: () => this.router.navigate(["/"]),
+                error: () => this.router.navigate(["/"])
+            });
+    }
 }

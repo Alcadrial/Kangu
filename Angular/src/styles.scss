@@ -27,9 +27,11 @@
     --color-surface-800: #1D1D1D;
     --color-surface-900: #151515;
     --color-surface-950: #0C0C0C;
+    --color-success-very-weak: #008E13;
     --color-success-weak: #00BA1B;
     --color-success-strong: #00D819;
-    --color-error-weak: #F70804;
+    --color-error-very-weak: #890202;
+    --color-error-weak: #A80303;
     --color-error-strong: #C90404;
     --text-2xs: 0.625rem;
     --text-3xs: 0.5rem;
@@ -69,6 +71,13 @@ button {
     border-radius: 3px;
     text-align: center;
     cursor: pointer;
+    &:disabled {
+        color: var(--color-surface-300);
+        cursor: not-allowed;
+    }
+    &:not(:disabled):hover {
+        filter: brightness(115%);
+    }
     &.primary {
         background-color: var(--color-primary-600);
         border-color: var(--color-primary-700);
@@ -109,10 +118,18 @@ button {
     &.success {
         background-color: var(--color-success-strong);
         border-color: var(--color-success-weak);
+        color: var(--color-success-weak);
+        &:disabled {
+            color: var(--color-success-very-weak);
+        }
     }
     &.destructive {
         background-color: var(--color-error-strong);
         border-color: var(--color-error-weak);
+        color: var(--color-error-weak);
+        &:disabled {
+            color: var(--color-error-very-weak);
+        }
     }
     &.inlinec {
         padding: 6px 12px;
@@ -136,13 +153,6 @@ button {
     &.small {
         padding: 2px 4px;
         font-size: small;
-    }
-    &:disabled {
-        color: var(--color-surface-300);
-        cursor: not-allowed;
-    }
-    &:not(:disabled):hover {
-        color: var(--color-surface-50);
     }
 }
 

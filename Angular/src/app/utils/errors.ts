@@ -10,6 +10,7 @@ export function translateError(error: HttpErrorResponse) {
 
 export function handleHttpError<T, O>(handle?: (error: HttpErrorResponse, caugth: Observable<T>) => O) {
     return catchError((error: HttpErrorResponse, caught: Observable<T>) => {
+        console.error(new Error(error.message))
         translateError(error);
         if (handle) handle(error, caught);
         throw new Error(translations.unknownError);

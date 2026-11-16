@@ -1,6 +1,11 @@
 
 <div class="size-full flex flex-row">
-    <chat-list [chats]="chats()" [error]="error()" class="h-full w-max-60 w-min-20 w-[30%]"/>
+    <chat-list
+        class="h-full w-max-60 w-min-20 w-[30%]"
+        [chats]="chats()"
+        [error]="error()"
+        (logout)="logout()"
+    />
     <chat-messages
         class="w-0 grow"
         [chat]="currentChat()"

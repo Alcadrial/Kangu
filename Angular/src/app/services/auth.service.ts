@@ -1,6 +1,6 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
-import { map, Observable, of, shareReplay, single, tap } from "rxjs";
+import { catchError, EMPTY, map, Observable, of, shareReplay, single, tap } from "rxjs";
 import { AUTHENTICATION_URLS } from "../constants/urls.constants";
 import { handleHttpError } from "~utils/errors";
 
@@ -69,8 +69,13 @@ export default class AuthService {
         return this.http.post<{}>(AUTHENTICATION_URLS.logout, null, { redirect: "manual" }).pipe(
             tap(() => {
                 this.userDataObservable = null;
+                this.csrfTokenObservable = null;
             }),
-            handleHttpError()
+            catchError((error: HttpErrorResponse) => {
+                this.userDataObservable = null;
+                this.csrfTokenObservable = null;
+                return of({});
+            })
         );
     }
 

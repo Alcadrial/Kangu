@@ -1,4 +1,6 @@
-<div class="size-full border-r border-neutral-700">
+<div class="size-full flex flex-col border-r border-surface-700">
+    <chat-user class="h-16"></chat-user>
+    <separator w="w-[95%]"></separator>
     @if (chats(); as chats) {
         <div class="size-full flex flex-col justify-between overflow-y-auto">
             <div class="h-0 grow w-full p-2 flex flex-col divide-y">
@@ -8,8 +10,8 @@
             </div>
             <separator w="w-[95%]"></separator>
             <button class="inlinec h-10 sticky bottom-0 flex flex-row justify-between items-center gap-1 fill" (click)="isCreateConversationModalOpen.set(true)">
-                <svg lucidePlus></svg>
                 <span class="truncate">New conversation</span>
+                <svg lucidePlus></svg>
             </button>
 
             <app-dialog
@@ -30,6 +32,12 @@
                     </button>
                 </form>
             </app-dialog>
+            
+            <separator w="w-[95%]" color="bg-surface-600"></separator>
+            <button class="inlinec destructive h-10 sticky bottom-0 flex flex-row justify-between items-center gap-1 fill" (click)="doLogout()">
+                <span class="truncate">Logout</span>
+                <svg lucideLogOut></svg>
+            </button>
         </div>
     }
     @else if (error(); as error) {
