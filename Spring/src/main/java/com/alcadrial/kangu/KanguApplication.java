@@ -4,16 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class KafkaTestApplication {
+public class KanguApplication {
 
-	/**
-	 * TODO: roles, events, remember me, email otp, admin, docs
-	 * TODO: test JSESSION
-	 * TODO: deploy
-	 * @param args
-	 */
 	public static void main(String[] args) {
-		SpringApplication.run(KafkaTestApplication.class, args);
+		SpringApplication.run(KanguApplication.class, args);
 	}
 
 }

@@ -41,13 +41,27 @@ class UserControllerTest {
 	
 	@Test
 	@WithMockUser(username = TestConstants.USERNAME)
-	public void getData() throws Exception
+	public void getSelfData() throws Exception
 	{
 		UserEntity.Safe user = new UserEntity.Safe(TestConstants.USERNAME, TestConstants.EMAIL, TestConstants.TIME_0, TestConstants.TIME_1, TestConstants.TIME_2, OnlineStatus.ON);
 		when(userService.get(TestConstants.USERNAME)).thenReturn(user);
 		
 		mockMvc
 			.perform(get("/api/user"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+			.andExpect(content().json(objectMapper.writeValueAsString(user)));
+	}
+	
+	@Test
+	@WithMockUser(username = TestConstants.USERNAME)
+	public void getOtherUserData() throws Exception
+	{
+		UserEntity.Safe user = new UserEntity.Safe(TestConstants.USERNAME1, TestConstants.EMAIL, TestConstants.TIME_0, TestConstants.TIME_1, TestConstants.TIME_2, OnlineStatus.ON);
+		when(userService.get(TestConstants.USERNAME1)).thenReturn(user);
+		
+		mockMvc
+			.perform(get("/api/user?username=" + TestConstants.USERNAME1))
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
 			.andExpect(content().json(objectMapper.writeValueAsString(user)));
