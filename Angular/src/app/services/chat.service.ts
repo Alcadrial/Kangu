@@ -1,5 +1,7 @@
 import { inject, Injectable } from "@angular/core";
-import { EMPTY, map, Observable } from "rxjs";
+import { catchError, EMPTY, filter, map, Observable, retry, Subject, Subscription, tap, timer } from "rxjs";
+import { webSocket, WebSocketSubject } from "rxjs/webSocket";
+import { RxStomp } from "@stomp/rx-stomp";
 import { HttpClient } from "@angular/common/http";
 import { handleHttpError } from "~utils/errors";
 
@@ -62,12 +64,35 @@ export type ChatPreviewAndMessages = {
     preview: ChatPreview
 }
 
+type SocketMessage = {
+    type: undefined;
+} | {
+    type: "message";
+    payload: RawMessage[];
+} | {
+    type: "cursor";
+    payload: Details;
+}
+
 @Injectable({ providedIn: "root" })
 export default class ChatService {
 
     private readonly http = inject(HttpClient);
 
+    private rxStomp: RxStomp;
+    private messagesSubject = new Subject<SocketMessage>();
+    private subcriptionCount = 0;
+
     data: ChatDetailsAndMessages | null = null;
+    messages = this.messagesSubject.asObservable();
+
+    constructor() {
+        this.rxStomp = new RxStomp();
+
+        this.rxStomp.configure({
+            brokerURL: `ws://localhost:4220/api/socket`,
+        });
+    }
 
     private collectMessagesParts(messages: RawMessage[]): Message[] {
         const newMessages: Message[] = [];
@@ -120,9 +145,34 @@ export default class ChatService {
         );
     }
 
-    subscribeMessages(receiver: string): Observable<Message> {
-        //implement websocket connection
-        return EMPTY;
+    subscribeMessages(): Observable<Message[]> {
+        if (!this.rxStomp.active) {
+            this.rxStomp.activate();
+            this.subcriptionCount++;
+        }
+
+        return this.rxStomp.watch("/app/subscribe/messages").pipe(
+            tap({
+                error: error => console.error("WebSocket connection error:", error),
+                complete: () => console.warn("WebSocket connection closed")
+            }),
+            map(message => JSON.parse(message.body) as SocketMessage),
+            filter(message => message.type === "message"),
+            map(({ payload: raw }) => {
+                if (!this.data) return [];
+                const message = this.collectMessagesParts(raw)[0];
+                this.data.messages.push(message);
+                return this.data.messages;
+            })
+        );
     }
 
+    public disconnect(): void {
+        if (this.subcriptionCount > 0) {
+            this.subcriptionCount--;
+            if (this.subcriptionCount == 0) {
+                this.rxStomp.deactivate();
+            }
+        }
+    }
 }
