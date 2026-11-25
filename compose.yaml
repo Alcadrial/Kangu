@@ -10,7 +10,7 @@ services:
   broker:
     image: apache/kafka:${KAFKA_VERSION}
     environment:
-      KAFKA_LOG4J_LOGGERS: org.apache.kafka.clients=DEBUG,org.apache.kafka.controller=TRACE
+      KAFKA_LOG4J_LOGGERS: org.apache.kafka.clients=WARN,org.apache.kafka.controller=WARN
 #      KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.rmi.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
 #      KAFKA_OPTS: -javaagent:/opt/jmx_exporter/jmx_prometheus_javaagent.jar=7071:/opt/jmx_exporter/config.yml
     ports:
@@ -20,29 +20,6 @@ services:
     volumes:
       - broker-data:/data
       - ./kafka/kafka-jmx-config.yml:/opt/jmx_exporter/config.yml
-  keycloak:
-    build:
-      context: ./keycloak
-      dockerfile: Containerfile
-      args:
-        DB_VERSION: ${DB_VERSION}
-        KEYCLOAK_VERSION: ${KEYCLOAK_VERSION}
-        DB_KEYCLOAK_PASSWORD: ${DB_KEYCLOAK_PASSWORD}
-        TAR: ${DB_KEYCLOAK_PASSWORD}
-    ports:
-      - "9093:8080"
-      - "9091:9000"
-    environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: tadmin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: tadmin
-    command:
-      - start-dev
-    networks:
-      - network
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
   prometheus:
     image: prom/prometheus:${PROMETHEUS_VERSION}
     ports:
