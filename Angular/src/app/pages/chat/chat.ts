@@ -74,9 +74,9 @@ export class Chat {
                     preview: {
                         ...chat.details,
                         username: receiver,
-                        lastMessage: lastMessage.parts[0].message,
-                        lastMessageMimeType: lastMessage.parts[0].mimeType,
-                        messageTimestamp: lastMessage.timestamp
+						lastMessage: lastMessage?.parts?.[0]?.message ?? "",
+						lastMessageMimeType: lastMessage?.parts?.[0]?.mimeType ?? "text/plain",
+						messageTimestamp: lastMessage?.timestamp ?? new Date()
                     }
                 });
             },
