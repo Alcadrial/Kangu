@@ -6,6 +6,8 @@ import ChatService, { ChatPreview, ChatPreviewAndMessages } from "~services/chat
 import UserService from "~services/user.service";
 import AuthService from "~services/auth.service";
 import { Router } from "@angular/router";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { Subscription } from "rxjs";
 
 @Component({
     selector: "chat-root",
@@ -18,6 +20,7 @@ export class Chat {
     private readonly userService = inject(UserService);
 	private readonly authService = inject(AuthService);
 	private readonly router = inject(Router);
+    private readonly destroyRef = inject(DestroyRef);
 
     readonly user = input<string>();
 
