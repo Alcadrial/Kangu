@@ -2,10 +2,8 @@ import { Component, computed, DestroyRef, effect, inject, input, signal, untrack
 import { ChatList } from "../../components/chat/chatList";
 import { ChatMessages } from "../../components/chat/chatMessages";
 import AlertService from "~services/alert.service";
-import ChatService, { ChatDetailsAndMessages, ChatPreview, ChatPreviewAndMessages } from "~services/chat.service";
+import ChatService, { ChatPreview, ChatPreviewAndMessages } from "~services/chat.service";
 import UserService from "~services/user.service";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Subscription } from "rxjs";
 import AuthService from "~services/auth.service";
 import { Router } from "@angular/router";
 
@@ -18,10 +16,8 @@ export class Chat {
     private readonly alertService = inject(AlertService);
     private readonly chatService = inject(ChatService);
     private readonly userService = inject(UserService);
-    private readonly authService = inject(AuthService);
-
-    private readonly router = inject(Router);
-    private readonly destroyRef = inject(DestroyRef);
+	private readonly authService = inject(AuthService);
+	private readonly router = inject(Router);
 
     readonly user = input<string>();
 
@@ -149,7 +145,6 @@ export class Chat {
 
     logout() {
         this.authService.logout()
-            .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 complete: () => this.router.navigate(["/"]),
                 error: () => this.router.navigate(["/"])
