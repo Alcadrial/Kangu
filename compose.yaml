@@ -28,7 +28,6 @@ services:
         DB_VERSION: ${DB_VERSION}
         KEYCLOAK_VERSION: ${KEYCLOAK_VERSION}
         DB_KEYCLOAK_PASSWORD: ${DB_KEYCLOAK_PASSWORD}
-        TAR: ${DB_KEYCLOAK_PASSWORD}
     ports:
       - "9093:8080"
       - "9091:9000"
@@ -61,7 +60,9 @@ services:
     depends_on:
       - prometheus
     volumes:
-      - ./grafana:/etc/grafana/provisioning/datasources
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/ds:/var/lib/custom/dashboards
       - grafana-storage:/var/lib/grafana
 
 #  spring:
