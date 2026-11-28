@@ -64,21 +64,21 @@ services:
       - ./grafana/datasources:/etc/grafana/provisioning/datasources
       - ./grafana/ds:/var/lib/custom/dashboards
       - grafana-storage:/var/lib/grafana
-
-#  spring:
-#    build:
-#      context: ./Spring
-#      dockerfile: Containerfile
-#    environment:
-#      DB_URL: db:1521
-#      DB_USERNAME: spring
-#      DB_PASSWORD: ${DB_SPRING_PASSWORD}
-#      KAFKA_URL: broker:1521
-#    networks:
-#      - network
-#    depends_on:
-#      - db
-#      - broker
+  spring:
+    build:
+      context: ./Spring
+      dockerfile: Containerfile
+    environment:
+      DB_URL: db:1521
+      DB_USERNAME: spring
+      DB_PASSWORD: ${DB_SPRING_PASSWORD}
+      KAFKA_URL: broker:9092
+      KEYCLOAK_URL: keycloak:9093
+    networks:
+      - network
+    depends_on:
+      - db
+      - broker
 #  front-end:
 #    build:
 #      context: ./Angular
