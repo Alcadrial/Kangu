@@ -21,7 +21,9 @@ import com.alcadrial.kangu.exception.UserNotFoundException;
 import com.alcadrial.kangu.utils.Constants;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestControllerAdvice
 public class ExceptionHandlerController {
@@ -99,6 +101,7 @@ public class ExceptionHandlerController {
 	@ExceptionHandler
 	ResponseEntity<?> unknownErrorRequest(Exception e)
 	{
+		log.error("An error occurred", e);
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(Constants.KNOWN_INTERNAL_ERROR_CODE, Constants.EMPTY_MESSAGE));
 	}
 }

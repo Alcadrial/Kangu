@@ -1,12 +1,14 @@
 package com.alcadrial.kangu.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.DelegatingSecurityContextRepository;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -19,33 +21,43 @@ import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler
 public class SecurityConfig {
 	
 	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http, @Autowired SecurityContextRepository securityContextRepository)
+	SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationConverter authenticationConverter)
 	{
 		XorCsrfTokenRequestAttributeHandler requestHandler = new XorCsrfTokenRequestAttributeHandler();
 		requestHandler.setCsrfRequestAttributeName(null);
 		http.cors(c -> c.disable())
-			.csrf(c -> c
-				.csrfTokenRequestHandler(requestHandler)
-			)
+			.csrf(c -> c.disable())
 			.authorizeHttpRequests(c -> c
-				.requestMatchers("/api/delete").hasAnyRole("USER")
-				.requestMatchers("/api/messages/**").hasAnyRole("USER")
-				.requestMatchers("/api/user").hasAnyRole("USER")
-				.requestMatchers("/api/user/**").hasAnyRole("USER")
-				.requestMatchers("/api/admin").hasAnyRole("ADMIN")
-				.requestMatchers("/api/admin/**").hasAnyRole("ADMIN")
-				.anyRequest().permitAll()
+				.anyRequest().authenticated()
 			)
-			.securityContext(c -> c
-				.securityContextRepository(securityContextRepository)
-				.requireExplicitSave(true)
+			.oauth2ResourceServer(c -> c
+				.jwt(d -> d
+					.jwtAuthenticationConverter(authenticationConverter)
+				)
 			)
-			.logout(c -> c
-				.logoutUrl("/api/logout")
-				.logoutSuccessUrl("/")
+			.sessionManagement(c -> c
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 			);
 		
 		return http.build();
+	}
+	
+	@Bean
+	JwtGrantedAuthoritiesConverter authoritiesConverter()
+	{
+		JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
+		//authoritiesConverter.setAuthorityPrefix(null);
+		return authoritiesConverter;
+	}
+	
+	@Bean
+	JwtAuthenticationConverter authenticationConverter(JwtGrantedAuthoritiesConverter authoritiesConverter)
+	{
+		JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
+		authenticationConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
+			return authoritiesConverter.convert(jwt);
+		});
+		return authenticationConverter;
 	}
 	
 	@Bean

@@ -30,6 +30,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
 	implementation("org.springframework.boot:spring-boot-hibernate")
 	implementation("org.springframework.boot:spring-boot-starter-kafka")
+	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -71,6 +72,7 @@ tasks.named("asciidoctor") {
 	inputs.dir snippetsDir
 	dependsOn test
 }
+
 tasks.named("bootBuildImage") {
 	imageName = project.name.toLowerCase()
 }

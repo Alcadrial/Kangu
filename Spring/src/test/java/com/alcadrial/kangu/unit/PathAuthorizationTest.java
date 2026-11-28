@@ -1,7 +1,6 @@
 package com.alcadrial.kangu.unit;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,29 +26,15 @@ class PathAuthorizationTest {
 	@RestController
 	interface TestController {
 		
-		//public urls
-		@GetMapping("/api/csrf")
-		ResponseEntity<?> csrfGet();
-		@PostMapping("/api/login")
-		ResponseEntity<?> loginPost();
-		@PostMapping("/api/register")
-		ResponseEntity<?> registerPost();
-		@GetMapping("/api/auth")
-		ResponseEntity<?> authGet();
-		
 		//user urls
-		@PostMapping("/api/delete")
-		ResponseEntity<?> deletePost();
 		@PostMapping("/api/messages/send")
 		ResponseEntity<?> messagesSendPost();
+		@GetMapping("/api/messages/get")
+		ResponseEntity<?> messagesGetGet();
+		@GetMapping("/api/messages/chats")
+		ResponseEntity<?> messagesChatsGet();
 		@GetMapping("/api/user")
 		ResponseEntity<?> userGet();
-		@PostMapping("/api/user/changeEmail")
-		ResponseEntity<?> userChangeEmail();
-		
-		//admin routes
-		@GetMapping("/api/admin")
-		ResponseEntity<?> adminGet();
 	}
 	
 	@Autowired
@@ -58,70 +43,35 @@ class PathAuthorizationTest {
 	TestController controller;
 	
 	@Test
-	public void successPublicEndpoints() throws Exception
-	{
-		when(controller.csrfGet()).thenReturn(ResponseEntity.ok().build());
-		mockMvc.perform(get("/api/csrf")).andExpect(status().isOk());
-		
-		when(controller.loginPost()).thenReturn(ResponseEntity.ok().build());
-		mockMvc.perform(post("/api/login").with(csrf())).andExpect(status().isOk());
-		
-		when(controller.registerPost()).thenReturn(ResponseEntity.ok().build());
-		mockMvc.perform(post("/api/register").with(csrf())).andExpect(status().isOk());
-		
-		when(controller.userGet()).thenReturn(ResponseEntity.ok().build());
-		mockMvc.perform(get("/api/auth")).andExpect(status().isOk());
-	}
-	
-	@Test
 	public void failPrivateEndpoints() throws Exception
 	{
-		when(controller.deletePost()).thenReturn(ResponseEntity.ok().build());
-		mockMvc.perform(post("/api/delete").with(csrf())).andExpect(status().isForbidden());
-		
 		when(controller.messagesSendPost()).thenReturn(ResponseEntity.ok().build());
-		mockMvc.perform(post("/api/messages/send").with(csrf())).andExpect(status().isForbidden());
+		mockMvc.perform(post("/api/messages/send")).andExpect(status().isUnauthorized());
 		
-		when(controller.adminGet()).thenReturn(ResponseEntity.ok().build());
-		mockMvc.perform(get("/api/admin").with(csrf())).andExpect(status().isForbidden());
+		when(controller.messagesGetGet()).thenReturn(ResponseEntity.ok().build());
+		mockMvc.perform(post("/api/messages/get")).andExpect(status().isUnauthorized());
 		
-		when(controller.adminGet()).thenReturn(ResponseEntity.ok().build());
-		mockMvc.perform(get("/api/user").with(csrf())).andExpect(status().isForbidden());
+		when(controller.messagesChatsGet()).thenReturn(ResponseEntity.ok().build());
+		mockMvc.perform(post("/api/messages/chats")).andExpect(status().isUnauthorized());
 		
-		when(controller.adminGet()).thenReturn(ResponseEntity.ok().build());
-		mockMvc.perform(post("/api/user/changeEmail").with(csrf())).andExpect(status().isForbidden());
+		when(controller.userGet()).thenReturn(ResponseEntity.ok().build());
+		mockMvc.perform(post("/api/user")).andExpect(status().isUnauthorized());
 	}
 	
 	@Test
 	@WithMockUser(roles = "USER")
 	public void successUserEndpoints() throws Exception
 	{
-		when(controller.deletePost()).thenReturn(ResponseEntity.ok().build());
-		mockMvc.perform(post("/api/delete").with(csrf())).andExpect(status().isOk());
-		
 		when(controller.messagesSendPost()).thenReturn(ResponseEntity.ok().build());
-		mockMvc.perform(post("/api/messages/send").with(csrf())).andExpect(status().isOk());
+		mockMvc.perform(post("/api/messages/send")).andExpect(status().isOk());
 		
-		when(controller.messagesSendPost()).thenReturn(ResponseEntity.ok().build());
-		mockMvc.perform(get("/api/user").with(csrf())).andExpect(status().isOk());
+		when(controller.messagesGetGet()).thenReturn(ResponseEntity.ok().build());
+		mockMvc.perform(get("/api/messages/get")).andExpect(status().isOk());
 		
-		when(controller.messagesSendPost()).thenReturn(ResponseEntity.ok().build());
-		mockMvc.perform(post("/api/user/changeEmail").with(csrf())).andExpect(status().isOk());
-	}
-	
-	@Test
-	@WithMockUser(roles = "USER")
-	public void failAdminEndpointsForUsers() throws Exception
-	{
-		when(controller.adminGet()).thenReturn(ResponseEntity.ok().build());
-		mockMvc.perform(get("/api/admin").with(csrf())).andExpect(status().isForbidden());
-	}
-	
-	@Test
-	@WithMockUser(roles = "ADMIN")
-	public void successAdminEndpoints() throws Exception
-	{
-		when(controller.adminGet()).thenReturn(ResponseEntity.ok().build());
-		mockMvc.perform(get("/api/admin").with(csrf())).andExpect(status().isOk());
+		when(controller.messagesChatsGet()).thenReturn(ResponseEntity.ok().build());
+		mockMvc.perform(get("/api/messages/chats")).andExpect(status().isOk());
+		
+		when(controller.userGet()).thenReturn(ResponseEntity.ok().build());
+		mockMvc.perform(get("/api/user")).andExpect(status().isOk());
 	}
 }

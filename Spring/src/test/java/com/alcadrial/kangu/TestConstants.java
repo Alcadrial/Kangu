@@ -7,10 +7,8 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.support.ParameterDeclarations;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import com.alcadrial.kangu.data.UserEntity;
+import com.alcadrial.kangu.user.UserEntity;
 
 public class TestConstants {
 	
@@ -42,10 +40,9 @@ public class TestConstants {
 	public static final String MESSAGE7 = "message7";
 	public static final String MESSAGE8 = "message8";
 	
-	public static final UserEntity USER = new UserEntity(USERNAME, PASSWORD, EMAIL);
-	public static final UserEntity USER1 = new UserEntity(USERNAME1, PASSWORD1, EMAIL1);
-	public static final UserEntity USER2 = new UserEntity(USERNAME2, PASSWORD2, EMAIL2);
-	public static final UserDetails USER_DETAILS = User.withUsername(USERNAME).password(PASSWORD).build();
+	public static final UserEntity USER = new UserEntity(USERNAME, EMAIL);
+	public static final UserEntity USER1 = new UserEntity(USERNAME1, EMAIL1);
+	public static final UserEntity USER2 = new UserEntity(USERNAME2, EMAIL2);
 	
 	public static final String[][] CREDENTIALS_01 = crossProduct(USERNAMES_01, PASSWORDS_01);
 	public static final String[][] CREDENTIALS_ALL = crossProduct(ALL_USERNAMES, ALL_PASSWORDS);
