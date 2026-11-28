@@ -28,6 +28,7 @@ public class SecurityConfig {
 		http.cors(c -> c.disable())
 			.csrf(c -> c.disable())
 			.authorizeHttpRequests(c -> c
+				.requestMatchers("/actuator/**").permitAll()
 				.anyRequest().authenticated()
 			)
 			.oauth2ResourceServer(c -> c

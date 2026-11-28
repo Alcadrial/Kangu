@@ -35,12 +35,28 @@ class PathAuthorizationTest {
 		ResponseEntity<?> messagesChatsGet();
 		@GetMapping("/api/user")
 		ResponseEntity<?> userGet();
+		
+		//metrics
+		@GetMapping("/actuator/")
+		ResponseEntity<?> actuatorGet();
+		@GetMapping("/actuator/health")
+		ResponseEntity<?> actuatorHealthGet();
 	}
 	
 	@Autowired
 	MockMvc mockMvc;
 	@MockitoBean
 	TestController controller;
+	
+	@Test
+	public void successPublicEndpoints() throws Exception
+	{
+		when(controller.actuatorGet()).thenReturn(ResponseEntity.ok().build());
+		mockMvc.perform(get("/actuator/")).andExpect(status().isOk());
+		
+		when(controller.actuatorHealthGet()).thenReturn(ResponseEntity.ok().build());
+		mockMvc.perform(get("/actuator/health")).andExpect(status().isOk());
+	}
 	
 	@Test
 	public void failPrivateEndpoints() throws Exception
